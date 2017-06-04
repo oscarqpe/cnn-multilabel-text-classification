@@ -18,8 +18,8 @@ global dictionary_size
 
 dictionary_size = 55443 # bow
 #dictionary_size = 55443 # tfidf
-#dictionary_size = 47115 # bow_stemm
-#dictionary_size = 47115 # bow_stemm_tfidf
+#dictionary_size = 55443 # bow_stemm
+#dictionary_size = 55443 # bow_stemm_tfidf
 
 global vocabulary  
 

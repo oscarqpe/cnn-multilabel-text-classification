@@ -43,7 +43,7 @@ stop_words = get_stop_words('en')
 
 #vectorizer = CountVectorizer(min_df=1, stop_words = stop_words) #bag of words
 #vectorizer2 = CountVectorizer(min_df=1, stop_words = stop_words) #bag of words
-vectorizer = TfidfVectorizer(min_df=1, stop_words = stop_words) #tfidf
+#vectorizer = TfidfVectorizer(min_df=1, stop_words = stop_words) #tfidf
 #vectorizer2 = TfidfVectorizer(min_df=1, stop_words = stop_words) #tfidf
 #vectorizer = CountVectorizer(ngram_range=(2, 2),token_pattern=r'\b\w+\b', min_df=1, stop_words = stop_words) # ngrams
 #vectorizer2 = CountVectorizer(ngram_range=(2, 2),token_pattern=r'\b\w+\b', min_df=1, stop_words = stop_words) # ngrams
@@ -97,9 +97,9 @@ data = None
 data = ds.Dataset(path, config.batch_size)
 data.read_rcv_vectors()
 '''
-#pickle.dump(vectorizer, open("data/bibtex/over200/vectorizer/vectorizer_tfidf.pickle", "wb"))
+#pickle.dump(vectorizer, open("data/bibtex/over200/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
-vectorizer = pickle.load(open("data/bibtex/over200/vectorizer/vectorizer_bow.pickle", "rb"))
+vectorizer = pickle.load(open("data/bibtex/over200/vectorizer/vectorizer_tfidf.pickle", "rb"))
 #print(vectorizer.vocabulary_)
 
 t = time.asctime()
@@ -161,8 +161,8 @@ with tf.Session(config=config_tf) as sess:
 				epoch += 1
 				print("Epoch: " + str(epoch))
 				data.shuffler()
-			if step % 2500 == 0:
-				save_path = saver.save(sess, "mlp_weights_bibtex/model" + str(model_saving) + "_bow.ckpt")
+			if step % 1000 == 0:
+				save_path = saver.save(sess, "mlp_weights_bibtex/model" + str(model_saving) + "_tfidf.ckpt")
 				model_saving += 1
 			step += 1
 		
