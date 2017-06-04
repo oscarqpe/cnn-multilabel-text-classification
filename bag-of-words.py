@@ -99,7 +99,7 @@ data.read_rcv_vectors()
 '''
 #pickle.dump(vectorizer, open("data/bibtex/over200/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
-vectorizer = pickle.load(open("data/bibtex/over200/vectorizer/vectorizer_tfidf.pickle", "rb"))
+vectorizer = pickle.load(open("data/bibtex/over200/vectorizer/vectorizer_bow_stemm.pickle", "rb"))
 #print(vectorizer.vocabulary_)
 
 t = time.asctime()
@@ -162,7 +162,7 @@ with tf.Session(config=config_tf) as sess:
 				print("Epoch: " + str(epoch))
 				data.shuffler()
 			if step % 1000 == 0:
-				save_path = saver.save(sess, "mlp_weights_bibtex/model" + str(model_saving) + "_tfidf.ckpt")
+				save_path = saver.save(sess, "mlp_weights_bibtex/model" + str(model_saving) + "_bow_stemm.ckpt")
 				model_saving += 1
 			step += 1
 		
