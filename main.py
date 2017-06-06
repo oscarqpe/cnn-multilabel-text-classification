@@ -48,10 +48,12 @@ data.all_data() # AgNews
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
-config_tf = tf.ConfigProto(
-        device_count = {'GPU': 0}
-    )
-with tf.Session(config=config_tf) as sess:
+#config_tf = tf.ConfigProto(
+#        device_count = {'GPU': 0}
+#    )
+c = tf.ConfigProto()
+c.gpu_options.visible_device_list = "0"
+with tf.Session(config=c) as sess:
     sess.run(init)
     #print(sess.run("{:.5f}".format(cnn.weights['wc1'])))
     t = time.asctime()
@@ -60,9 +62,9 @@ with tf.Session(config=config_tf) as sess:
     step = 1
     # Keep training until reach max iterations
     epoch = 1
-    model_saving = 0
+    model_saving = 5
     print("Epoch: " + str(epoch))
-    #saver.restore(sess, "cnn_weights/model_cnn3_11.ckpt")
+    saver.restore(sess, "cnn_weights_agnews/model_cnn_4.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
