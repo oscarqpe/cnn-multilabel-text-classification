@@ -48,12 +48,11 @@ data.all_data() # AgNews
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
-#config_tf = tf.ConfigProto(
-#        device_count = {'GPU': 0}
-#    )
-c = tf.ConfigProto()
-c.gpu_options.visible_device_list = "0"
+c = tf.ConfigProto(device_count = {'GPU': 0})
+#c = tf.ConfigProto()
+#c.gpu_options.visible_device_list = "0,1"
 with tf.Session(config=c) as sess:
+#with tf.Session() as sess:
     sess.run(init)
     #print(sess.run("{:.5f}".format(cnn.weights['wc1'])))
     t = time.asctime()
@@ -62,13 +61,13 @@ with tf.Session(config=c) as sess:
     step = 1
     # Keep training until reach max iterations
     epoch = 1
-    model_saving = 5
+    model_saving = 10
     print("Epoch: " + str(epoch))
-    saver.restore(sess, "cnn_weights_agnews/model_cnn_4.ckpt")
+    saver.restore(sess, "cnn_weights_agnews/model_cnn_8.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 640000 # 5000 * 128
+    config.training_iters = 0#640000 # 5000 * 128
     data.shuffler()
     while step * config.batch_size <= config.training_iters:
         data.next_batch()
@@ -116,7 +115,7 @@ with tf.Session(config=c) as sess:
     data = None
     data = ds.Dataset(path, config.batch_size)
     #data.read_labels() # bibtext, RCV
-    data.all_data() # AgNEWS
+    data.all_data_test() # AgNEWS
     step = 1
     total_test = data.total_texts
     print (total_test)

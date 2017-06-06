@@ -44,7 +44,7 @@ stop_words = get_stop_words('en')
 #vectorizer = CountVectorizer(min_df=1, stop_words = stop_words) #bag of words
 #vectorizer = TfidfVectorizer(min_df=1, stop_words = stop_words) #tfidf
 #vectorizer = CountVectorizer(min_df=1, stop_words = stop_words, tokenizer = lt.LemmaTokenizer()) #bag of words stemm
-vectorizer = TfidfVectorizer(min_df=1, stop_words = stop_words, tokenizer = lt.LemmaTokenizer()) #tfidf stemm
+#vectorizer = TfidfVectorizer(min_df=1, stop_words = stop_words, tokenizer = lt.LemmaTokenizer()) #tfidf stemm
 
 data = None
 
@@ -84,15 +84,15 @@ with tf.Session(config=config_tf) as sess:
 	sess.run(init)
 	t = time.asctime()
 	print (t)
-	model_saving = 0
-	#saver.restore(sess, "mlp_weights/model0_l2.ckpt")
+	model_saving = 9
+	saver.restore(sess, "mlp_weights_agnews/model8_bow.ckpt")
 	train = True
 	if train == True:
 		step = 1
 		epoch = 1
 		print("TRAINING")
 		print("Epoch: " + str(epoch))
-		config.training_iters = 640000 # 5000 * 128
+		config.training_iters = 0#640000 # 5000 * 128
 		while step * config.batch_size <= config.training_iters:
 			data.next_batch()
 			#data.generate_batch() # vectors
@@ -133,14 +133,14 @@ with tf.Session(config=config_tf) as sess:
 				print("Epoch: " + str(epoch))
 				data.shuffler()
 			if step % 1000 == 0:
-				save_path = saver.save(sess, "mlp_weights_bibtex/model" + str(model_saving) + "_tfidf_stemm.ckpt")
+				save_path = saver.save(sess, "mlp_weights_agnews/model" + str(model_saving) + "_bow.ckpt")
 				model_saving += 1
 			step += 1
 		
 		data = None
 		data = ds.Dataset(path, config.batch_size)
 		#data.read_rcv_vectors()
-		data.all_data()
+		data.all_data_test()
 		print("TESTING")
 		step = 0
 		total_test = data.total_texts
@@ -164,8 +164,8 @@ with tf.Session(config=config_tf) as sess:
 			batch_x = batch_x.reshape(config.batch_size, config.dictionary_size)
 			#print("X shape: ", batch_x.shape)
 			
-			batch_y = data.labels_train
-			
+			#batch_y = data.labels_train # bibtex, rcv1
+			batch_y = np.array(data.labels_train) # agnews
 			batch_y = batch_y.reshape(config.batch_size, config.label_size)
 
 			ou = sess.run(pred, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1})
@@ -181,12 +181,14 @@ with tf.Session(config=config_tf) as sess:
 			f_beta_sum += f_beta
 			#print(acc)
 			print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + str(loss[0]))
+			'''
 			print ("hammin_loss: ", "{:.6f}".format(hammin_loss))
 			print ("subset_accuracy: ", "{:.6f}".format(subset_accuracy))
 			print ("accuracy: ", "{:.6f}".format(accuracy))
 			print ("precision: ", "{:.6f}".format(precision))
 			print ("recall: ", "{:.6f}".format(recall))
 			print ("f_beta: ", "{:.6f}".format(f_beta))
+			'''
 			step += 1
 		print ("PROMEDIO:")
 		print ("hammin_loss_sum: ", hammin_loss_sum / step)
