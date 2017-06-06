@@ -12,8 +12,10 @@
 /multi-class/vectors/*
 /mlp_weights/*
 /mlp_weights_bibtex/*
+/mlp_weights_agnews/*
 /cnn_weights/*
 /cnn_weights_bibtex/*
+/cnn_weights_agnews/*
 /ae_weights/*
 *.pyc
 __pycache__/*

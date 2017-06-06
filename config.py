@@ -1,7 +1,8 @@
 global labels
 labels = []
 global label_size
-
+# AG NEWS
+label_size = 4
 global max_characters
 max_characters = 1014
 global batch_size
@@ -15,11 +16,16 @@ global dictionary_size
 #dictionary_size = 47115 # bow_stemm_tfidf
 
 # BIBTEX
-
-dictionary_size = 55443 # bow
+#dictionary_size = 55443 # bow
 #dictionary_size = 55443 # tfidf
 #dictionary_size = 55443 # bow_stemm
 #dictionary_size = 55443 # bow_stemm_tfidf
+
+# AGNEWS
+dictionary_size = 60619 # bow
+#dictionary_size = 60619 # tfidf
+#dictionary_size = 73964 # bow_stemm
+#dictionary_size = 73964 # bow_stemm_tfidf
 
 global vocabulary  
 
