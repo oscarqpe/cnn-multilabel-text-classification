@@ -72,7 +72,6 @@ print(len(vectorizer.vocabulary_))
 #pickle.dump(vectorizer, open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
 vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_bow.pickle", "rb"))
-
 #print(vectorizer.vocabulary_)
 
 t = time.asctime()
