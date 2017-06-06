@@ -71,7 +71,7 @@ print(len(vectorizer.vocabulary_))
 '''
 #pickle.dump(vectorizer, open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
-vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_bow.pickle", "rb"))
+vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "rb"))
 #print(vectorizer.vocabulary_)
 
 t = time.asctime()
@@ -133,7 +133,7 @@ with tf.Session(config=config_tf) as sess:
 				print("Epoch: " + str(epoch))
 				data.shuffler()
 			if step % 1000 == 0:
-				save_path = saver.save(sess, "mlp_weights_bibtex/model" + str(model_saving) + "_tfidf_stemm.ckpt")
+				save_path = saver.save(sess, "mlp_weights_agnews/model" + str(model_saving) + "_tfidf_stemm.ckpt")
 				model_saving += 1
 			step += 1
 		
@@ -164,8 +164,8 @@ with tf.Session(config=config_tf) as sess:
 			batch_x = batch_x.reshape(config.batch_size, config.dictionary_size)
 			#print("X shape: ", batch_x.shape)
 			
-			batch_y = data.labels_train
-			
+			#batch_y = data.labels_train # bibtext, rcv
+			batch_y = np.array(data.labels_train) # agnews
 			batch_y = batch_y.reshape(config.batch_size, config.label_size)
 
 			ou = sess.run(pred, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1})
