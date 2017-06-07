@@ -5,8 +5,8 @@ import time
 import sys
 import config
 import utils
-#utils.read_labels("bibtex")
-import class_DatasetAgN as ds
+utils.read_labels("bibtex")
+import class_DatasetBibtex as ds
 import cnn as cn
 env = sys.argv[1]
 from tensorflow.python.framework import ops
@@ -43,8 +43,8 @@ correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
-#data.read_labels() # bibtex, RCV
-data.all_data() # AgNews
+data.read_labels() # bibtex, RCV
+#data.all_data() # AgNews
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
@@ -61,17 +61,18 @@ with tf.Session(config=c) as sess:
     step = 1
     # Keep training until reach max iterations
     epoch = 1
-    model_saving = 10
+    model_saving = 5
     print("Epoch: " + str(epoch))
-    saver.restore(sess, "cnn_weights_agnews/model_cnn_8.ckpt")
+    saver.restore(sess, "cnn_weights_bibtex/model_cnn_4.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 0#640000 # 5000 * 128
+    config.training_iters = 640000 # 5000 * 128
     data.shuffler()
     while step * config.batch_size <= config.training_iters:
         data.next_batch()
-        data.generate_batch_hot()
+        #data.generate_batch() # vector
+        data.generate_batch_hot() # bibtex
         #print data.texts_train.shape
         #print config.batch_size
         batch_x = np.array(data.texts_train)
@@ -106,7 +107,7 @@ with tf.Session(config=c) as sess:
             print("Epoch: " + str(epoch))
             data.shuffler()
         if step % 1000 == 0:
-            save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
+            save_path = saver.save(sess, "cnn_weights_bibtex/model_cnn_" + str(model_saving) + ".ckpt")
             model_saving += 1
         step += 1
     print(plot_x)
@@ -114,8 +115,8 @@ with tf.Session(config=c) as sess:
     print ("TESTING")
     data = None
     data = ds.Dataset(path, config.batch_size)
-    #data.read_labels() # bibtext, RCV
-    data.all_data_test() # AgNEWS
+    data.read_labels() # bibtext, RCV
+    #data.all_data_test() # AgNEWS
     step = 1
     total_test = data.total_texts
     print (total_test)

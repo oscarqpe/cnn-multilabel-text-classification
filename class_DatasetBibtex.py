@@ -45,7 +45,7 @@ class Dataset:
 		else:
 			self.end = self.start
 			self.start = self.start - self.batch
-	def generate_batch_one_hot(self):
+	def generate_batch_hot(self):
 		start = self.start
 		end = self.end
 		self.texts_train = []
