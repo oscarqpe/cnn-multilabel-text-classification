@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 import config
 import utils
-#utils.read_labels("bibtex")
+utils.read_labels("rcv")
 import class_DatasetAgN as ds
 import mlp as ml
 import lemma_tokenizer as lt
@@ -71,7 +71,7 @@ print(len(vectorizer.vocabulary_))
 '''
 #pickle.dump(vectorizer, open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
-vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "rb"))
+vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_bow.pickle", "rb"))
 #print(vectorizer.vocabulary_)
 
 t = time.asctime()
@@ -85,14 +85,14 @@ with tf.Session(config=config_tf) as sess:
 	t = time.asctime()
 	print (t)
 	model_saving = 0
-	#saver.restore(sess, "mlp_weights/model0_l2.ckpt")
+	saver.restore(sess, "mlp_weights_agnews/model4_bow.ckpt")
 	train = True
 	if train == True:
 		step = 1
 		epoch = 1
 		print("TRAINING")
 		print("Epoch: " + str(epoch))
-		config.training_iters = 640000 # 5000 * 128
+		config.training_iters = 128#640000 # 5000 * 128
 		while step * config.batch_size <= config.training_iters:
 			data.next_batch()
 			#data.generate_batch() # vectors
@@ -112,7 +112,7 @@ with tf.Session(config=config_tf) as sess:
 			
 			sess.run(optimizer, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: mlp.dropout})
 
-			if step % 20 == 0:
+			if step % 1 == 0:
 				#print "Get Accuracy: "
 				loss = sess.run([cost], feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1.})
 				#print loss
@@ -140,7 +140,7 @@ with tf.Session(config=config_tf) as sess:
 		data = None
 		data = ds.Dataset(path, config.batch_size)
 		#data.read_rcv_vectors()
-		data.all_data()
+		data.all_data_test() # agnews
 		print("TESTING")
 		step = 0
 		total_test = data.total_texts

@@ -1,0 +1,20 @@
+
+AGNEWS
+
+lsi 5000
+hammin_loss_sum:  0.3191207627118644
+subset_accuracy_sum:  0.8404396186440678
+accuracy_sum:  0.8404396186440678
+precision_sum:  0.8404396186440678
+recall_sum:  0.8404396186440678
+f_beta_sum:  0.8404396186440678
+
+lsi 10000
+hammin_loss_sum:  0.3005826271186441
+subset_accuracy_sum:  0.849708686440678
+accuracy_sum:  0.849708686440678
+precision_sum:  0.849708686440678
+recall_sum:  0.849708686440678
+f_beta_sum:  0.849708686440678
+
+bow 5000

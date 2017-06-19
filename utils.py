@@ -221,6 +221,8 @@ def get_accuracy_test (logits, labels):
 				logits_2[0][indice[0]] = 0
 		if len(max_h) == 0:
 			max_h = max_x
+
+		max_h = max_x # multi class
 		max_x = np.array(max_x)
 		ranking_y_predicted = rankdata(max_x_val)
 		#print("(X, Y): ", max_h, max_y)
@@ -242,8 +244,8 @@ def get_accuracy_test (logits, labels):
 		### AVERAGE PRECISION
 		average_precision_sum = 0
 		### SUBSET ACCURACY ###
-		if len (max_h) == len(max_x):
-			if len(np.setdiff1d(max_x, max_h)) == 0 and len(np.setdiff1d(max_h, max_x)) == 0:
+		if len (max_h) == len(max_y):
+			if len(np.setdiff1d(max_y, max_h)) == 0 and len(np.setdiff1d(max_h, max_y)) == 0:
 				subset_accuracy_sum += 1
 
 		accuracy_sum += len(np.intersect1d(max_h, max_y)) / len(np.union1d(max_h, max_y))

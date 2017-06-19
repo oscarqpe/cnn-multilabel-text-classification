@@ -28,7 +28,7 @@ class Mlp:
 		}
 		self.biases = {
 			'bd1': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian), name = "bd1"),
-			'bd2': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian), name = "bd2"),
+			#'bd2': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian), name = "bd2"),
 			'out': tf.Variable(tf.random_normal([config.label_size], mean=0.0, stddev=self.gaussian), name = "bout")
 		}
 

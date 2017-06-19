@@ -22,10 +22,10 @@ global dictionary_size
 #dictionary_size = 55443 # bow_stemm_tfidf
 
 # AGNEWS
-#dictionary_size = 60619 # bow
+dictionary_size = 60619 # bow
 #dictionary_size = 60619 # tfidf
 #dictionary_size = 73964 # bow_stemm
-dictionary_size = 73964 # bow_stemm_tfidf
+#dictionary_size = 73964 # bow_stemm_tfidf
 
 global vocabulary  
 

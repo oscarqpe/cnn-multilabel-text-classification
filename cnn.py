@@ -33,7 +33,7 @@ class Cnn:
 			'wc6': tf.Variable(tf.random_normal([3, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc6"),
 			# fully connected, 7*7*64 inputs, self.output_conv outputs
 			'wd1': tf.Variable(tf.random_normal([34 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd1"),
-			'wd2': tf.Variable(tf.random_normal([self.hidden_size, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd2"),
+			#'wd2': tf.Variable(tf.random_normal([self.hidden_size, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd2"),
 			# 1024 inputs, 10 outputs (class prediction)
 			'out': tf.Variable(tf.random_normal([self.hidden_size, config.label_size], mean=0.0, stddev=self.gaussian_h), name="out")
 		}
@@ -45,7 +45,7 @@ class Cnn:
 			'bc5': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc5"),
 			'bc6': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc6"),
 			'bd1': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd1"),
-			'bd2': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd2"),
+			#'bd2': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd2"),
 			'out': tf.Variable(tf.random_normal([config.label_size], mean=0.0, stddev=self.gaussian_h), name="bout")
 		}
 	# Create some wrappers for simplicity
