@@ -88,10 +88,11 @@ def get_accuracy (logits, labels):
 		total_etiquetas = np.sum(labels[j])
 		#print("total etiquetas:", total_etiquetas)
 		logits_ = np.copy(logits[j]).reshape(1, config.label_size)
-		print("[")
+		'''print("[")
 		for k in range(0, len(logits[j])):
 			print("{:.7f}".format(logits[j][k]), end =", ")
 		print("]")
+		'''
 		#print logits_.shape
 		labels_ = np.copy(labels[j]).reshape(1, config.label_size)
 		total = total_etiquetas.astype(int)
@@ -108,7 +109,7 @@ def get_accuracy (logits, labels):
 			#print(total,i,indice[0])
 			max_y[i] = indice[0]
 			labels_[0][indice[0]] = 0
-		print(j, "(X, Y): ", max_x, max_y)
+		#print(j, "(X, Y): ", max_x, max_y)
 		c = np.in1d(max_x,max_y)
 		cc = np.where(c == True)[0]
 		if len(cc) != 0:

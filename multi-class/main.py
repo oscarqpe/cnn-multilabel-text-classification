@@ -87,7 +87,7 @@ vocvoc = dict((values[i], i) for i in range(0, len(values)))
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 config_tf = tf.ConfigProto(device_count = {'GPU': 0})
-config.training_iters = 720000
+
 with tf.Session(config=config_tf) as sess:
 	sess.run(init)
 	t = time.asctime()
@@ -99,10 +99,10 @@ with tf.Session(config=config_tf) as sess:
 	epoch = 1
 	model_saving = 0
 	print("Epoch: " + str(epoch))
-	saver.restore(sess, "models/model_cnn_1.ckpt")
+	#saver.restore(sess, "models/model_cnn_1.ckpt")
 	#data.total_characters()
-	
-	while step * config.batch_size < config.training_iters:
+	config.training_iters = 640000
+	while step * config.batch_size <= config.training_iters:
 		data.next_batch()
 		#data.generate_batch() # bag of words
 		data.generate_batch_hot()
@@ -118,18 +118,19 @@ with tf.Session(config=config_tf) as sess:
 		#print("Y shape: ", batch_y.shape)
 		sess.run(optimizer, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: mlp.dropout})
 
-		if step % 1 == 0:
+		if step % 20 == 0:
 			#print "Get Accuracy: "
 			loss, acc = sess.run([cost, accuracy], feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1.})
 			ou = sess.run(pred, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1})
 			ou = tf.nn.softmax(ou)
 			ou = np.array(ou.eval())
-			
+			'''
 			for i in range(0, len(ou)):
 				print("[", end=" ")
 				for j in range(0, len(ou[i])):
 					print("{:.6f}".format(ou[i][j]), end = ", ")
 				print("]")
+			'''
 			print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + \
                   "{:.6f}".format(loss) + ", Training Accuracy= " + \
                   "{:.5f}".format(acc))
@@ -137,9 +138,48 @@ with tf.Session(config=config_tf) as sess:
 			epoch += 1
 			print("Epoch: " + str(epoch))
 			data.shuffler()
-		if step % 2000 == 0:
+		if step % 1000 == 0:
 			print("Save weights!!!")
-			save_path = saver.save(sess, "models/model_cnn_" + str(model_saving) + ".ckpt")
+			save_path = saver.save(sess, "models/model_cnn2_" + str(model_saving) + ".ckpt")
 			model_saving += 1
 		step += 1
-		
+	print ("TESTING")
+	data = None
+	data = ds.Dataset(path, config.batch_size)
+	#data.read_labels() # bibtext, RCV
+	data.all_data_test() # AgNEWS
+	step = 1
+	total_test = data.total_texts
+	print (total_test)
+	data.shuffler()
+	while step * config.batch_size <= total_test:
+		data.next_batch()
+		#data.read_data()
+		data.generate_batch_hot()
+		#print data.texts_train.shape
+		#print config.batch_size
+		batch_x = np.array(data.texts_train)
+		batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
+		#print batch_x.shape
+		batch_y = np.array(data.labels_train)
+		batch_y = batch_y.reshape(config.batch_size, config.label_size)
+
+		loss, acc = sess.run([cost, accuracy], feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1.})
+		#ou = sess.run(pred, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1})
+		#ou = tf.nn.softmax(ou)
+		#ou = np.array(ou.eval())
+		'''
+		for i in range(0, len(ou)):
+			print("[", end=" ")
+			for j in range(0, len(ou[i])):
+				print("{:.6f}".format(ou[i][j]), end = ", ")
+			print("]")
+		'''
+		print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + \
+				"{:.6f}".format(loss) + ", Training Accuracy= " + \
+				"{:.5f}".format(acc))
+		step += 1
+	step -= 1
+	
+t = time.asctime()
+print (t)

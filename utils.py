@@ -3,6 +3,8 @@ import config
 import re
 from PIL import Image
 from scipy.stats import rankdata
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
 def one_hot_encoder (text):
 	matrix_one_hot = np.array([np.zeros(config.vocabulary_size, dtype=np.float64)])
@@ -16,7 +18,7 @@ def one_hot_encoder (text):
 				array_encoded[index_character] = 1.0
 				matrix_one_hot = np.append(matrix_one_hot, [array_encoded], axis = 0)
 			except ValueError:
-			    matrix_one_hot = np.append(matrix_one_hot, [np.zeros(config.vocabulary_size)], axis = 0)
+				matrix_one_hot = np.append(matrix_one_hot, [np.zeros(config.vocabulary_size)], axis = 0)
 	else:
 		limit_character = 0
 		for count_character, character in enumerate(text):
@@ -67,7 +69,7 @@ def read_labels (type):
 			for line in ins:
 				config.labels.append(line.strip("\n"))
 				config.label_size = len(config.labels)
-	elif type == 2:
+	elif type == "rcv":
 		with open("data/rcv1-2/rcv1.topics.txt", "r") as ins:
 			for line in ins:
 				config.labels.append(line.strip("\n"))
@@ -90,7 +92,52 @@ def multilabel(logits, labels):
 	out = tf.nn.softmax(logits)
 	out = -tf.reduce_sum(labels * tf.log(out))
 	return out
+def ngrams (text):
+	array = np.zeros([config.vocabulary_size_grams,config.vocabulary_size_grams])
+	temp_text = text.replace("\t"," ").lower()
+	missing = ""
+	for l in range(0,len(temp_text) - 1):
+		try:
+			index_character = config.vocabulary_grams.index(temp_text[l].lower())
+			index = config.vocabulary_grams.index(temp_text[l + 1].lower())
+			array[index_character, index] += 1
+		except ValueError:
+			missing += temp_text[l]
+	total_characters = len(temp_text) - 1
+	#print(total_characters)
+	array = array * (1 / total_characters)
+	return array
 
+def ngrams_test (texts):
+	for i in range(len(texts)):
+		array = np.zeros([config.vocabulary_size_grams,config.vocabulary_size_grams])
+		temp_text = texts[i].replace("\t"," ").lower()
+		missing = ""
+		print(temp_text)
+		for l in range(0,len(temp_text) - 1):
+			try:
+				index_character = config.vocabulary_grams.index(temp_text[l].lower())
+				index = config.vocabulary_grams.index(temp_text[l + 1].lower())
+				array[index_character, index] += 1
+			except ValueError:
+				missing += temp_text[l]
+		print("missing:", missing)
+		print(array)
+		total_characters = len(temp_text) - 1
+		print(total_characters)
+		array = array * (1 / total_characters)
+		print(array)
+		plt.imshow(array, cmap='gray')
+		plt.show()
+def ngrams_picture (array):
+	array = array.reshape([4, 1932])
+	for i in range(4):
+		for j in range(1932):
+			print(array[i, j], end=", ")
+		print("XD")
+	print(array.shape)
+	plt.imshow(array)
+	plt.show()
 def get_accuracy (index, logits, labels):
 	#print (logits.shape)
 	#print (labels.shape)
@@ -130,7 +177,7 @@ def get_accuracy (index, logits, labels):
 	return count
 
 def get_accuracy_test (logits, labels):
-	umbral = 0.5
+	umbral = 0.75
 
 	hammin_loss = 0
 	one_error = 0
@@ -197,6 +244,14 @@ def get_accuracy_test (logits, labels):
 			logits_2[0][indice[0]] = 0
 		if len(max_h) == 0:
 			logits_2 = np.array(logits[j]).reshape(1, config.label_size)
+			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.50:
+				#print(logits_2[0][np.argmax(logits_2, 1)[0]], " > ", umbral)
+				indice = np.argmax(logits_2, 1)
+				max_h.append(indice[0])
+				max_h_val.append(logits_2[0][indice[0]])
+				logits_2[0][indice[0]] = 0
+		if len(max_h) == 0:
+			logits_2 = np.array(logits[j]).reshape(1, config.label_size)
 			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.25:
 				#print(logits_2[0][np.argmax(logits_2, 1)[0]], " > ", umbral)
 				indice = np.argmax(logits_2, 1)
@@ -205,22 +260,16 @@ def get_accuracy_test (logits, labels):
 				logits_2[0][indice[0]] = 0
 		if len(max_h) == 0:
 			logits_2 = np.array(logits[j]).reshape(1, config.label_size)
-			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.15:
+			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.125:
 				#print(logits_2[0][np.argmax(logits_2, 1)[0]], " > ", umbral)
 				indice = np.argmax(logits_2, 1)
 				max_h.append(indice[0])
 				max_h_val.append(logits_2[0][indice[0]])
 				logits_2[0][indice[0]] = 0
-		if len(max_h) == 0:
-			logits_2 = np.array(logits[j]).reshape(1, config.label_size)
-			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.10:
-				#print(logits_2[0][np.argmax(logits_2, 1)[0]], " > ", umbral)
-				indice = np.argmax(logits_2, 1)
-				max_h.append(indice[0])
-				max_h_val.append(logits_2[0][indice[0]])
-				logits_2[0][indice[0]] = 0
+		
 		if len(max_h) == 0:
 			max_h = max_x
+		#max_h = max_x ## for multi class
 		max_x = np.array(max_x)
 		ranking_y_predicted = rankdata(max_x_val)
 		#print("(X, Y): ", max_h, max_y)
@@ -242,15 +291,16 @@ def get_accuracy_test (logits, labels):
 		### AVERAGE PRECISION
 		average_precision_sum = 0
 		### SUBSET ACCURACY ###
-		if len (max_h) == len(max_x):
-			if len(np.setdiff1d(max_x, max_h)) == 0 and len(np.setdiff1d(max_h, max_x)) == 0:
+		#print (max_h, max_x, max_y)
+		if len (max_h) == len(max_y):
+			if len(np.setdiff1d(max_y, max_h)) == 0 and len(np.setdiff1d(max_h, max_y)) == 0:
 				subset_accuracy_sum += 1
 
 		accuracy_sum += len(np.intersect1d(max_h, max_y)) / len(np.union1d(max_h, max_y))
 		precision_sum += len(np.intersect1d(max_h, max_y)) / len(max_h)
 		recall_sum += len(np.intersect1d(max_h, max_y)) / len(max_y)
 		f_beta_sum += (2 * len(np.intersect1d(max_h, max_y))) / (len(max_h) + len(max_y))
-	
+	#print(accuracy_sum, end=", ")
 	hammin_loss = hammin_loss_sum / config.batch_size
 	one_error = one_error_sum / config.batch_size
 	coverage = coverage_sum / config.batch_size
