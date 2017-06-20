@@ -32,7 +32,7 @@ class Cnn:
 			'wc5': tf.Variable(tf.random_normal([3, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc5"),
 			'wc6': tf.Variable(tf.random_normal([3, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc6"),
 			# fully connected, 7*7*64 inputs, self.output_conv outputs
-			'wd1': tf.Variable(tf.random_normal([68 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd1"),
+			'wd1': tf.Variable(tf.random_normal([34 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd1"),
 			#'wd2': tf.Variable(tf.random_normal([self.hidden_size, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd2"),
 			# 1024 inputs, 10 outputs (class prediction)
 			'out': tf.Variable(tf.random_normal([self.hidden_size, config.label_size], mean=0.0, stddev=self.gaussian_h), name="out")
@@ -79,7 +79,7 @@ class Cnn:
 
 		conv2 = self.convolution_1d(conv1, weights['wc2'], biases['bc2'], strides=1)
 		print(conv2.shape)
-		conv2 = self.max_pool_1d(conv2, 642 - 7 + 1, self.output_conv, 3)
+		conv2 = self.max_pool_1d(conv2, 336 - 7 + 1, self.output_conv, 3)
 		print(conv2.shape)
 
 		conv3 = self.convolution_1d(conv2, weights['wc3'], biases['bc3'], strides=1)
@@ -91,7 +91,7 @@ class Cnn:
 		print(conv5.shape)
 		conv6 = self.convolution_1d(conv5, weights['wc6'], biases['bc6'], strides=1)
 		print(conv6.shape)
-		pool6 = self.max_pool_1d(conv6, 204, self.output_conv, 3)
+		pool6 = self.max_pool_1d(conv6, 102, self.output_conv, 3)
 		print(pool6.shape)
 		# Fully connected layer
 		# Reshape conv2 output to fit fully connected layer input

@@ -54,3 +54,23 @@ precision_sum:  0.8532550108534184
 recall_sum:  0.8532550108534184
 f_beta_sum:  0.8532550108534184
 
+RCV
+CNN words grams
+e 5000
+hammin_loss_sum:  1.835536858974359
+subset_accuracy_sum:  0.3719951923076923
+accuracy_sum:  0.6072823108993487
+precision_sum:  0.8414582000031217
+recall_sum:  0.6400939339829061
+f_beta_sum:  0.6894461767620624
+e 10000
+hammin_loss_sum:  1.821915064102564
+subset_accuracy_sum:  0.38065905448717946
+accuracy_sum:  0.6096985753573797
+precision_sum:  0.8407795022541111
+recall_sum:  0.6392801583043469
+f_beta_sum:  0.6893948656817583
+
+CNN one hot 1932
+e 5000
+

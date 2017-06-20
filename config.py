@@ -4,7 +4,7 @@ global label_size
 # AG NEWS
 label_size = 4
 global max_characters
-max_characters = 1932#1014
+max_characters = 1014#1932
 global batch_size
 batch_size = 128
 global to_embedding

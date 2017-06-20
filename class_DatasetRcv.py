@@ -15,15 +15,23 @@ class Dataset:
 		self.texts_train = []
 		self.labels_train = []
 		self.batch = batch
-		self.total_texts = 23040# 23149
+		self.total_texts = 20736#23040# 23149
 		# test 0
-		self.total_test = 19968#20000
+		self.total_test = 2304#19968#20000
 		self.start = 0
 		self.end = 0
 		self.start_test = 0
 		self.end_test = 0
 		self.vocabulary_size = 47236
+	def test(self):
+		self.start = 0
+		self.end = 0
+		self.total_texts = 2304
 
+	def train(self):
+		self.start = 0
+		self.end = 0
+		self.total_texts = 20736
 	def next_batch(self):
 		if self.end == 0:
 			self.start = 0
@@ -74,7 +82,8 @@ class Dataset:
 		self.labels_train = []
 		data_split = self.ids[start:end]
 		for i in range(0, len(data_split)):
-			ids_index = data_split[i][0].split(" ")
+			#print(data_split[i])
+			ids_index = data_split[i].split(" ")
 			id = int(ids_index[0])
 			index = int(ids_index[1])
 			labels = self.labels[index][0]
@@ -536,3 +545,23 @@ class Dataset:
 		np.random.shuffle(self.ids)
 		self.end = 0
 		self.start = 0
+	def kfold (self):
+		self.shuffler()
+		#print(self.ids)
+		ids_temp = np.split(self.ids, [23040, 109])
+		#print(ids_temp)
+		#print(np.shape(ids_temp))
+		self.ids_k = np.split(ids_temp[0], 10)
+		#print(np.shape(self.ids_k))
+		#print(self.ids_k[0])
+	def next_fold(self, n):
+		self.ids = []
+		for i in range(10):
+			if i != n:
+				#print(i)
+				self.ids = np.append(self.ids, self.ids_k[i])
+		#print(np.shape(self.ids))
+	def fold_test(self, n):
+		self.ids = []
+		self.ids = np.append(self.ids, self.ids_k[n])
+

@@ -58,74 +58,83 @@ saver = tf.train.Saver()
 with tf.Session() as sess:
     sess.run(init)
     #print(sess.run("{:.5f}".format(cnn.weights['wc1'])))
-    print("TRAINING")
-    step = 1
-    # Keep training until reach max iterations
-    epoch = 1
-    model_saving = 0
-    print("Epoch: " + str(epoch))
-    #saver.restore(sess, "cnn_weights/model_cnn5_3_mll.ckpt")
+    
+    #save_path = saver.save(sess, "cnn_weights/model_cnn_init_k.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 640000 # 5000 * 128
-    data.shuffler()
-    t = time.asctime()
-    print (t)
-    train = True
-    if train == True:
-        while step * config.batch_size <= config.training_iters:
-            data.next_batch()
-            #data.generate_batch() # vector
-            data.generate_batch_hot() # bibtex
-            #print data.texts_train.shape
-            #print config.batch_size
-            batch_x = np.array(data.texts_train)
-            batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
-            #print("X shape: ", batch_x.shape)
-            batch_y = np.array(data.labels_train)
-            batch_y = batch_y.reshape(config.batch_size, config.label_size)
-            #print(len(batch_x), len(batch_x[0]))
-            #print("Y shape: ", batch_y.shape)
-            sess.run(optimizer, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: cnn.dropout})
+    data.kfold()
+    target = open("results/rcv-cnn-1014.txt", 'w')
+    target.truncate()
+    for i in range(10):
+        saver.restore(sess, "cnn_weights/model_cnn_init_k.ckpt")
+        data.next_fold(i)
+        # train
+        train = True
+        if train == True:
+            print("TRAINING K=", i)
+            step = 1
+            data.train()
+            # Keep training until reach max iterations
+            epoch = 1
+            print("Epoch: " + str(epoch))
+            config.training_iters = 640000 # 5000 * 128
+            t = time.asctime()
+            print (t)
+            while step * config.batch_size <= config.training_iters:
+                data.next_batch()
+                #data.generate_batch() # vector
+                data.generate_batch_hot() # bibtex
+                #print data.texts_train.shape
+                #print config.batch_size
+                batch_x = np.array(data.texts_train)
+                batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
+                #print("X shape: ", batch_x.shape)
+                batch_y = np.array(data.labels_train)
+                batch_y = batch_y.reshape(config.batch_size, config.label_size)
+                #print(len(batch_x), len(batch_x[0]))
+                #print("Y shape: ", batch_y.shape)
+                sess.run(optimizer, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: cnn.dropout})
 
-            if step % 20 == 0:
-                #print "Get Accuracy: "
-                loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
-                #print loss
-                ou = sess.run(pred, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1})
-                #print ou.shape
-                #print batch_y.shape
-                [hammin_loss, one_error, coverage, ranking_loss, average_precision, subset_accuracy, accuracy, precision, recall, f_beta] = utils.get_accuracy_test(ou, batch_y)
-                #print(acc)
-                plot_x.append(step * config.batch_size)
-                plot_y.append(loss)
-                print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + "{:.6f}".format(loss[0]))
-                print ("hammin_loss: ", "{:.6f}".format(hammin_loss))
-                print ("subset_accuracy: ", "{:.6f}".format(subset_accuracy))
-                print ("accuracy: ", "{:.6f}".format(accuracy))
-                print ("precision: ", "{:.6f}".format(precision))
-                print ("recall: ", "{:.6f}".format(recall))
-                print ("f_beta: ", "{:.6f}".format(f_beta))
-            if data.end == data.total_texts:
-                epoch += 1
-                print("Epoch: " + str(epoch))
-                data.shuffler()
-            if step % 5000 == 0:
-                #save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
-                save_path = saver.save(sess, "cnn_weights/model_cnn6_" + str(model_saving) + "_mll.ckpt")
-                model_saving += 1
-            step += 1
+                if step % 20 == 0:
+                    #print "Get Accuracy: "
+                    loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
+                    #print loss
+                    ou = sess.run(pred, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1})
+                    #print ou.shape
+                    #print batch_y.shape
+                    [hammin_loss, one_error, coverage, ranking_loss, average_precision, subset_accuracy, accuracy, precision, recall, f_beta] = utils.get_accuracy_test(ou, batch_y)
+                    #print(acc)
+                    plot_x.append(step * config.batch_size)
+                    plot_y.append(loss)
+                    print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + "{:.6f}".format(loss[0]))
+                    print ("hammin_loss: ", "{:.6f}".format(hammin_loss))
+                    print ("subset_accuracy: ", "{:.6f}".format(subset_accuracy))
+                    print ("accuracy: ", "{:.6f}".format(accuracy))
+                    print ("precision: ", "{:.6f}".format(precision))
+                    print ("recall: ", "{:.6f}".format(recall))
+                    print ("f_beta: ", "{:.6f}".format(f_beta))
+                if data.end == data.total_texts:
+                    epoch += 1
+                    print("Epoch: " + str(epoch))
+                    data.shuffler()
+                if step % 5000 == 0:
+                    #save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
+                    save_path = saver.save(sess, "cnn_weights/model_cnn_k" + str(i) + ".ckpt")
+                    #model_saving += 1
+                step += 1
         print(plot_x)
         print(plot_y)
         t = time.asctime()
         print (t)
         print ("TESTING")
-        data = None
-        data = ds.Dataset(path, config.batch_size)
-        data.read_labels_test(0) # bibtext, RCV
+        #data = None
+        #data = ds.Dataset(path, config.batch_size)
+        #data.read_labels_test(0) # bibtext, RCV
         #data.all_data_test() # AgNEWS
         step = 1
+        data.test()
+        data.fold_test(i)
         total_test = data.total_texts
         print (total_test)
         hammin_loss_sum = 0
@@ -134,13 +143,12 @@ with tf.Session() as sess:
         precision_sum = 0
         recall_sum = 0
         f_beta_sum = 0
-        data.shuffler()
         t = time.asctime()
         print (t)
         while step * config.batch_size <= total_test:
             data.next_batch()
             #data.read_data()
-            data.generate_batch_hot_test()
+            data.generate_batch_hot()
             #print data.texts_train.shape
             #print config.batch_size
             batch_x = np.array(data.texts_train)
@@ -179,3 +187,18 @@ with tf.Session() as sess:
         print ("f_beta_sum: ", f_beta_sum / step)
         t = time.asctime()
         print (t)
+        line = "\nk FOLD " + str(i)
+        target.write(line)
+        line = "\nhammin_loss: " + "{:.4f}".format(hammin_loss_sum / step)
+        target.write(line)
+        line = "\nsubset_accuracy: " + "{:.4f}".format(subset_accuracy_sum / step)
+        target.write(line)
+        line = "\naccuracy: " + "{:.4f}".format(accuracy_sum / step)
+        target.write(line)
+        line = "\nprecision: " + "{:.4f}".format(precision_sum / step)
+        target.write(line)
+        line = "\nrecall: " + "{:.4f}".format(recall_sum / step)
+        target.write(line)
+        line = "\nf_beta: " + "{:.4f}".format(f_beta_sum / step)
+        target.write(line)
+    target.close()

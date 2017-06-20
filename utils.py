@@ -177,7 +177,7 @@ def get_accuracy (index, logits, labels):
 	return count
 
 def get_accuracy_test (logits, labels):
-	umbral = 0.75
+	umbral = 0.50
 
 	hammin_loss = 0
 	one_error = 0
@@ -244,7 +244,7 @@ def get_accuracy_test (logits, labels):
 			logits_2[0][indice[0]] = 0
 		if len(max_h) == 0:
 			logits_2 = np.array(logits[j]).reshape(1, config.label_size)
-			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.50:
+			while logits_2[0][np.argmax(logits_2, 1)[0]] > 0.35:
 				#print(logits_2[0][np.argmax(logits_2, 1)[0]], " > ", umbral)
 				indice = np.argmax(logits_2, 1)
 				max_h.append(indice[0])
