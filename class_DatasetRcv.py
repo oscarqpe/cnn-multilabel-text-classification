@@ -45,7 +45,29 @@ class Dataset:
 		else:
 			self.end = self.start
 			self.start = self.start - self.batch
-	def generate_batch_one_hot(self):
+	def generate_embedding (self):
+		start = self.start
+		end = self.end
+		self.texts_train = []
+		self.labels_train = []
+		data_split = self.ids[start:end]
+		for i in range(0, len(data_split)):
+			ids_index = data_split[i][0].split(" ")
+			id = int(ids_index[0])
+			index = int(ids_index[1])
+			labels = self.labels[index][0]
+			split_labels = labels.split(" ")
+			labels_temp = np.zeros(config.label_size)
+			for j in range(1, len(split_labels)):
+				try:
+					label_index = utils.find_label_index(split_labels[j])
+					labels_temp[label_index] = 1.0
+				except ValueError:
+					print("Not have label: ", split_labels[j])
+			self.labels_train.append(labels_temp)
+			
+			self.texts_train.append(self.texts[index])
+	def generate_batch_hot(self):
 		start = self.start
 		end = self.end
 		self.texts_train = []
@@ -67,6 +89,39 @@ class Dataset:
 			self.labels_train.append(labels_temp)
 			text_name = str(id) + "newsML.xml"
 			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			temp_text = ""
+			for text in reuters.findall("title"):
+				#print(text.text)
+				temp_text = temp_text + text.text.replace(" ", "")
+			for text in reuters.findall("text"):
+				for p in text.findall("p"):
+					temp_text = temp_text + p.text.replace(" ", "").replace("\t","")
+			#print("ID TExt: ", id)
+			#print(temp_text)
+			matrix = utils.one_hot_encoder(temp_text)
+			self.texts_train.append(matrix)
+	def generate_batch_hot_test(self):
+		start = self.start
+		end = self.end
+		self.texts_train = []
+		self.labels_train = []
+		data_split = self.ids[start:end]
+		for i in range(0, len(data_split)):
+			ids_index = data_split[i][0].split(" ")
+			id = int(ids_index[0])
+			index = int(ids_index[1])
+			labels = self.labels[index][0]
+			split_labels = labels.split(" ")
+			labels_temp = np.zeros(config.label_size)
+			for j in range(1, len(split_labels)):
+				try:
+					label_index = utils.find_label_index(split_labels[j])
+					labels_temp[label_index] = 1.0
+				except ValueError:
+					print("Not have label: ", split_labels[j])
+			self.labels_train.append(labels_temp)
+			text_name = str(id) + "newsML.xml"
+			reuters = et.parse("data/rcv1-2/test-text0-0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
 			temp_text = ""
 			for text in reuters.findall("title"):
 				#print(text.text)
@@ -177,9 +232,41 @@ class Dataset:
 			#print("ID TExt: ", id)
 			#print(temp_text)
 			self.texts_train = np.append(self.texts_train, temp_text)
+	def generate_batch_text_grams(self):
+		start = self.start
+		end = self.end
+		self.texts_train = np.array([])
+		self.labels_train = np.array([])
+		data_split = self.ids[start:end]
+		for i in range(0, len(data_split)):
+			ids_index = data_split[i][0].split(" ")
+			id = int(ids_index[0])
+			index = int(ids_index[1])
+			labels = self.labels[index][0]
+			split_labels = labels.split(" ")
+			labels_temp = np.zeros(config.label_size)
+			for j in range(1, len(split_labels)):
+				try:
+					label_index = utils.find_label_index(split_labels[j])
+					labels_temp[label_index] = 1.0
+				except ValueError:
+					print("Not have label: ", split_labels[j])
+			self.labels_train = np.append(self.labels_train, labels_temp)
+			text_name = str(id) + "newsML.xml"
+			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			temp_text = ""
+			for text in reuters.findall("title"):
+				#print(text.text)
+				temp_text = temp_text + text.text#.replace(" ", "")
+			for text in reuters.findall("text"):
+				for p in text.findall("p"):
+					temp_text = temp_text + p.text#.replace(" ", "").replace("\t","")
+			#print("ID TExt: ", id)
+			temp_text = utils.ngrams(temp_text)
+			self.texts_train = np.append(self.texts_train, temp_text)
 	def generate_batch_test_text(self):
-		start = self.start_test
-		end = self.end_test
+		start = self.start
+		end = self.end
 		self.texts_train = np.array([])
 		self.labels_train = np.array([])
 		data_split = self.ids[start:end]
@@ -314,7 +401,8 @@ class Dataset:
 			self.labels = list(reader)
 			self.labels = np.array(self.labels)
 
-	def read_rcv_vectors_test(self, test):
+	def read_labels_test(self, test):
+		self.total_texts = 19968#20000
 		with open('data/rcv1-2/ids_index_test0_' + str(test) + '.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.ids = np.array(list(reader))
@@ -413,6 +501,36 @@ class Dataset:
 			line = temp_text[1]
 			target.write(line)
 			target.close()
+	def distribution_num_labels(self):
+		distribution = np.zeros((20,), dtype=np.int)
+		print(distribution)
+		for label in self.labels:
+			l = label[0].split(" ")
+			distribution[len(l) - 1] += 1
+		print(distribution)
+
+	def distribution_train_labels(self):
+		distribution = np.zeros((103,), dtype=np.int)
+		i = 0
+		for label in self.labels:
+			l = label[0].split(" ")
+			for j in range(1, len(l)):
+				try:
+					label_index = utils.find_label_index(l[j])
+					distribution[label_index] += 1
+				except ValueError:
+					print("Not have label: ", l[j])
+		for i in range(len(distribution)):
+			print(distribution[i], end = ", ")
+	def distribution_characters(self):
+		i = 0
+		distribution = np.zeros((40000,), dtype=np.int)
+		for text in self.texts:
+			text = text.replace(" ", "").replace("\n","")
+			distribution[len(list(text)) - 1] += 1
+		for i in range(len(distribution)):
+			print(i, distribution[i], end = ", ")
+			i += 1
 	def shuffler(self):
 		print ("shuffling data")
 		np.random.shuffle(self.ids)

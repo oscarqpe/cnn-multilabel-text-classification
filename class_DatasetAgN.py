@@ -127,6 +127,14 @@ class Dataset:
 			reader = csv.reader(f)
 			self.texts = list(reader)
 			self.texts = np.array(self.texts)
+	def distribution_train_labels(self):
+		distribution = np.zeros((config.label_size,), dtype=np.int)
+		distribution_l = np.zeros((20,), dtype=np.int)
+		i = 0
+		for text in self.texts:
+			l = label[0].split(" ")
+		for i in range(len(distribution)):
+			print(distribution[i], end = ", ")
 	def shuffler(self):
 		print ("shuffling texts")
 		np.random.shuffle(self.texts)

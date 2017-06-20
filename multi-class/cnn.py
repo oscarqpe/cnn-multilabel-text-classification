@@ -102,7 +102,7 @@ class Cnn:
 		#print(fc1)
 		fc1 = tf.nn.dropout(fc1, dropout)
 		#print(fc1)
-		'''
+		#'''
 		fc2 = tf.reshape(fc1, [-1, weights['wd2'].get_shape().as_list()[0]])
 		#print fc2
 		fc2 = tf.add(tf.matmul(fc2, weights['wd2']), biases['bd2'])
@@ -111,8 +111,8 @@ class Cnn:
 		fc2 = tf.nn.dropout(fc2, dropout)
 		#print(fc2)
 		# Output, class prediction
-		'''
-		out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
+		#'''
+		out = tf.add(tf.matmul(fc2, weights['out']), biases['out'])
 		#print out
 		#out = tf.nn.softmax(out)
 		return out

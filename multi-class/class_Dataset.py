@@ -120,7 +120,12 @@ class Dataset:
 			reader = csv.reader(f)
 			self.data = list(reader)
 			self.data = np.array(self.data)
-
+	def all_data_test(self):
+		self.total_texts = 7552
+		with open('../data/ag_news/test.csv', 'r') as f:
+			reader = csv.reader(f)
+			self.data = list(reader)
+			self.data = np.array(self.data)
 	def shuffler(self):
 		print ("shuffling data")
 		np.random.shuffle(self.data)

@@ -45,7 +45,7 @@ class Dataset:
 		else:
 			self.end = self.start
 			self.start = self.start - self.batch
-	def generate_batch_one_hot(self):
+	def generate_batch_hot(self):
 		start = self.start
 		end = self.end
 		self.texts_train = []
@@ -328,6 +328,28 @@ class Dataset:
 			temp_text = self.temp_stemming[i]
 			temp_text = temp_text.split(".W")
 			self.texts.append(temp_text[1])
+	def distribution_num_labels(self):
+		distribution = np.zeros((20,), dtype=np.int)
+		print(distribution)
+		for label in self.labels:
+			l = label[0].split(" ")
+			distribution[len(l) - 1] += 1
+		for i in range(len(distribution)):
+			print(distribution[i], end = ", ")
+		print("hola")
+	def distribution_train_labels(self):
+		distribution = np.zeros((config.label_size,), dtype=np.int)
+		i = 0
+		for label in self.labels:
+			l = label[0].split(" ")
+			for j in range(1, len(l)):
+				try:
+					label_index = utils.find_label_index(l[j])
+					distribution[label_index] += 1
+				except ValueError:
+					print("Not have label: ", l[j])
+		for i in range(len(distribution)):
+			print(distribution[i], end = ", ")
 	def shuffler(self):
 		print ("shuffling data")
 		np.random.shuffle(self.ids)

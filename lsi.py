@@ -56,8 +56,9 @@ svd_model = TruncatedSVD(n_components=1014,
 
 svd_transformer = Pipeline([('tfidf', vectorizer), 
                             ('svd', svd_model)])
-#texts_train = list(data.texts[0:120000, 2])
+texts_train = list(data.texts[0:120000, 2])
 #svd_transformer.fit_transform(texts_train)
+
 #pickle.dump(svd_transformer, open("data/ag_news/vectorizer/vectorizer_lsi.pickle", "wb"))
 svd_transformer = pickle.load(open("data/ag_news/vectorizer/vectorizer_lsi.pickle", "rb"))
 init = tf.global_variables_initializer()
@@ -77,112 +78,114 @@ with tf.Session(config=config_tf) as sess:
     epoch = 1
     model_saving = 5
     print("Epoch: " + str(epoch))
-    saver.restore(sess, "cnn_weights_agnews/model_cnn_4.ckpt")
+    saver.restore(sess, "cnn_weights_agnews/model_cnn_5.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 640000 # 5000 * 128
+    config.training_iters = 256#640000 # 5000 * 128
     data.shuffler()
-    while step * config.batch_size <= config.training_iters:
-        data.next_batch()
-        data.generate_batch()
-        #print data.texts_train.shape
-        #print config.batch_size
-        #batch_x = np.array(data.texts_train)
-        batch_x = svd_transformer.transform(data.texts_train) 
-        batch_x = batch_x.reshape(config.batch_size, config.dictionary_size)
-        #batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
-        #print("X shape: ", batch_x.shape)
-        batch_y = np.array(data.labels_train)
-        batch_y = batch_y.reshape(config.batch_size, config.label_size)
-        #print(len(batch_x), len(batch_x[0]))
-        #print("Y shape: ", batch_y.shape)
-        sess.run(optimizer, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: cnn.dropout})
+    train = True
+    if train == True:
+        while step * config.batch_size <= config.training_iters:
+            data.next_batch()
+            data.generate_batch()
+            #print data.texts_train.shape
+            #print config.batch_size
+            #batch_x = np.array(data.texts_train)
+            batch_x = svd_transformer.transform(data.texts_train) 
+            batch_x = batch_x.reshape(config.batch_size, config.dictionary_size)
+            #batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
+            #print("X shape: ", batch_x.shape)
+            batch_y = np.array(data.labels_train)
+            batch_y = batch_y.reshape(config.batch_size, config.label_size)
+            #print(len(batch_x), len(batch_x[0]))
+            #print("Y shape: ", batch_y.shape)
+            sess.run(optimizer, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: cnn.dropout})
 
-        if step % 20 == 0:
-            #print "Get Accuracy: "
+            if step % 1 == 0:
+                #print "Get Accuracy: "
+                loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
+                #print loss
+                ou = sess.run(pred, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1})
+                #print ou.shape
+                #print batch_y.shape
+                [hammin_loss, one_error, coverage, ranking_loss, average_precision, subset_accuracy, accuracy, precision, recall, f_beta] = utils.get_accuracy_test(ou, batch_y)
+                #print(acc)
+                plot_x.append(step * config.batch_size)
+                plot_y.append(loss)
+                print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + "{:.6f}".format(loss[0]))
+                print ("hammin_loss: ", "{:.6f}".format(hammin_loss))
+                print ("subset_accuracy: ", "{:.6f}".format(subset_accuracy))
+                print ("accuracy: ", "{:.6f}".format(accuracy))
+                print ("precision: ", "{:.6f}".format(precision))
+                print ("recall: ", "{:.6f}".format(recall))
+                print ("f_beta: ", "{:.6f}".format(f_beta))
+            if data.end == data.total_texts:
+                epoch += 1
+                print("Epoch: " + str(epoch))
+                data.shuffler()
+            if step % 5000 == 0:
+                save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
+                model_saving += 1
+            step += 1
+        print(plot_x)
+        print(plot_y)
+        print ("TESTING")
+        data = None
+        data = ds.Dataset(path, config.batch_size)
+        #data.read_labels() # bibtext, RCV
+        data.all_data_test() # AgNEWS
+        step = 1
+        total_test = data.total_texts
+        print (total_test)
+        hammin_loss_sum = 0
+        subset_accuracy_sum = 0
+        accuracy_sum = 0
+        precision_sum = 0
+        recall_sum = 0
+        f_beta_sum = 0
+        while step * config.batch_size <= total_test:
+            data.next_batch()
+            #data.read_data()
+            data.generate_batch()
+            #print data.texts_train.shape
+            #print config.batch_size
+            #batch_x = np.array(data.texts_train)
+            batch_x = svd_transformer.transform(data.texts_train) 
+            batch_x = batch_x.reshape(config.batch_size, config.dictionary_size)
+            #batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
+            #print batch_x.shape
+            batch_y = np.array(data.labels_train)
+            batch_y = batch_y.reshape(config.batch_size, config.label_size)
+
+            ou = sess.run(pred, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1})
+            #print(ou)
+            [hammin_loss, one_error, coverage, ranking_loss, average_precision, subset_accuracy, accuracy, precision, recall, f_beta] = utils.get_accuracy_test(ou, batch_y)
             loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
             #print loss
-            ou = sess.run(pred, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1})
-            #print ou.shape
-            #print batch_y.shape
-            [hammin_loss, one_error, coverage, ranking_loss, average_precision, subset_accuracy, accuracy, precision, recall, f_beta] = utils.get_accuracy_test(ou, batch_y)
+            hammin_loss_sum += hammin_loss
+            subset_accuracy_sum += subset_accuracy
+            accuracy_sum += accuracy
+            precision_sum += precision
+            recall_sum += recall
+            f_beta_sum += f_beta
             #print(acc)
-            plot_x.append(step * config.batch_size)
-            plot_y.append(loss)
-            print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + "{:.6f}".format(loss[0]))
+            print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + str(loss[0]))
             print ("hammin_loss: ", "{:.6f}".format(hammin_loss))
             print ("subset_accuracy: ", "{:.6f}".format(subset_accuracy))
             print ("accuracy: ", "{:.6f}".format(accuracy))
             print ("precision: ", "{:.6f}".format(precision))
             print ("recall: ", "{:.6f}".format(recall))
             print ("f_beta: ", "{:.6f}".format(f_beta))
-        if data.end == data.total_texts:
-            epoch += 1
-            print("Epoch: " + str(epoch))
-            data.shuffler()
-        if step % 5000 == 0:
-            save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
-            model_saving += 1
-        step += 1
-    print(plot_x)
-    print(plot_y)
-    print ("TESTING")
-    data = None
-    data = ds.Dataset(path, config.batch_size)
-    #data.read_labels() # bibtext, RCV
-    data.all_data_test() # AgNEWS
-    step = 1
-    total_test = data.total_texts
-    print (total_test)
-    hammin_loss_sum = 0
-    subset_accuracy_sum = 0
-    accuracy_sum = 0
-    precision_sum = 0
-    recall_sum = 0
-    f_beta_sum = 0
-    while step * config.batch_size <= total_test:
-        data.next_batch()
-        #data.read_data()
-        data.generate_batch()
-        #print data.texts_train.shape
-        #print config.batch_size
-        #batch_x = np.array(data.texts_train)
-        batch_x = svd_transformer.transform(data.texts_train) 
-        batch_x = batch_x.reshape(config.batch_size, config.dictionary_size)
-        #batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
-        #print batch_x.shape
-        batch_y = np.array(data.labels_train)
-        batch_y = batch_y.reshape(config.batch_size, config.label_size)
-
-        ou = sess.run(pred, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1})
-        #print(ou)
-        [hammin_loss, one_error, coverage, ranking_loss, average_precision, subset_accuracy, accuracy, precision, recall, f_beta] = utils.get_accuracy_test(ou, batch_y)
-        loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
-        #print loss
-        hammin_loss_sum += hammin_loss
-        subset_accuracy_sum += subset_accuracy
-        accuracy_sum += accuracy
-        precision_sum += precision
-        recall_sum += recall
-        f_beta_sum += f_beta
-        #print(acc)
-        print ("Iter " + str(step * config.batch_size) + ", Minibatch Loss= " + str(loss[0]))
-        print ("hammin_loss: ", "{:.6f}".format(hammin_loss))
-        print ("subset_accuracy: ", "{:.6f}".format(subset_accuracy))
-        print ("accuracy: ", "{:.6f}".format(accuracy))
-        print ("precision: ", "{:.6f}".format(precision))
-        print ("recall: ", "{:.6f}".format(recall))
-        print ("f_beta: ", "{:.6f}".format(f_beta))
-        step += 1
-    step -= 1
-    print ("PROMEDIO:")
-    print ("hammin_loss_sum: ", hammin_loss_sum / step)
-    print ("subset_accuracy_sum: ", subset_accuracy_sum / step)
-    print ("accuracy_sum: ", accuracy_sum / step)
-    print ("precision_sum: ", precision_sum / step)
-    print ("recall_sum: ", recall_sum / step)
-    print ("f_beta_sum: ", f_beta_sum / step)
-    
-t = time.asctime()
-print (t)
+            step += 1
+        step -= 1
+        print ("PROMEDIO:")
+        print ("hammin_loss_sum: ", hammin_loss_sum / step)
+        print ("subset_accuracy_sum: ", subset_accuracy_sum / step)
+        print ("accuracy_sum: ", accuracy_sum / step)
+        print ("precision_sum: ", precision_sum / step)
+        print ("recall_sum: ", recall_sum / step)
+        print ("f_beta_sum: ", f_beta_sum / step)
+        
+    t = time.asctime()
+    print (t)
