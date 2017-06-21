@@ -40,15 +40,15 @@ correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
 data.read_labels() # bibtex, RCV
-data.read_text(0, 23149)
+#data.read_text(0, 23149)
 
 #max_document_length = max([len(x.split(" ")) for x in data.texts])
 #print(max_document_length)
 #config.to_embedding = max_document_length
 vocab_processor = learn.preprocessing.VocabularyProcessor(config.to_embedding)
-print(data.texts[0])
-data.texts = np.array(list(vocab_processor.fit_transform(data.texts)))
-print(len(vocab_processor.vocabulary_))
+#print(data.texts[0])
+#data.texts = np.array(list(vocab_processor.fit_transform(data.texts)))
+#print(len(vocab_processor.vocabulary_))
 #print(x[0])
 
 #data.all_data() # AgNews
@@ -76,7 +76,7 @@ with tf.Session(config=c) as sess:
 	data.shuffler()
 	t = time.asctime()
 	print (t)
-	train = True
+	train = False
 	if train == True:
 		while step * config.batch_size <= config.training_iters:
 			data.next_batch()
@@ -87,7 +87,7 @@ with tf.Session(config=c) as sess:
 			#print config.batch_size
 			batch_x = np.array(data.texts_train)
 			#batch_x = batch_x.reshape(config.batch_size, config.vocabulary_size * config.max_characters)
-			#print("X shape: ", batch_x.shape)
+			print("X shape: ", batch_x.shape)
 			batch_y = np.array(data.labels_train)
 			batch_y = batch_y.reshape(config.batch_size, config.label_size)
 			#print(len(batch_x), len(batch_x[0]))

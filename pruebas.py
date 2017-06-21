@@ -1,33 +1,44 @@
-'''
-import tensorflow as tf
+import csv
 import numpy as np
-config_tf = tf.ConfigProto(
-        device_count = {'GPU': 0}
-    )
-bpmll_out_module = tf.load_op_library('custom/bp_mll.so')
-with tf.Session(config=config_tf) as sess:
-	input = tf.random_normal([86016], mean=0.0, stddev=0.9)
-	labels = tf.constant(np.random.randint(2, size=86016))
-	input = tf.cast(input, tf.float32)
-	labels = tf.cast(labels, tf.float32)
-	input = tf.reshape(input, [128, 672])
-	labels = tf.reshape(labels, [128, 672])
-	print (bpmll_out_module.bp_mll(input, labels).eval())
-	'''
-from nltk import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from nltk.stem.porter import *
-from sklearn.feature_extraction.text import CountVectorizer
+import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
-class LemmaTokenizer(object):
-	def __init__(self):
-		self.stemmer = PorterStemmer()
-	def __call__(self, doc):
-		return [self.stemmer.stem(t) for t in word_tokenize(doc)]
-vect = TfidfVectorizer(tokenizer=LemmaTokenizer())
-corpus = ["Hello World father mother book vocabulary tokenizer", "stemming stemmer lemmatization tokenizer"]
-vect.fit(corpus)
-print(vect.vocabulary_)
+from nltk.tokenize import RegexpTokenizer
+from nltk.stem import LancasterStemmer
+from sklearn.decomposition import TruncatedSVD
+from sklearn.pipeline import Pipeline
+from stop_words import get_stop_words
+from sklearn.metrics import pairwise_distances
 
-x = vect.transform(corpus).toarray()
-print(x)
+class Tokenizer(object):
+    def __init__(self):
+        self.tok = RegexpTokenizer(r'some_regular_expression')
+        self.stemmer = LancasterStemmer()
+    def __call__(self, doc):
+        return [self.stemmer.stem(token) 
+                for token in self.tok.tokenize(doc)]
+
+stop_words = get_stop_words('en')
+vectorizer = TfidfVectorizer(stop_words=stop_words, 
+                             use_idf=True, 
+                             smooth_idf=True)
+
+svd_model = TruncatedSVD(n_components=500, 
+                         algorithm='randomized',
+                         n_iter=10, random_state=42)
+
+svd_transformer = Pipeline([('tfidf', vectorizer), 
+                            ('svd', svd_model)])
+texts = []
+with open('data/ag_news/train.csv', 'r') as f:
+	reader = csv.reader(f)
+	texts = list(reader)
+	texts = np.array(texts)
+texts_train = list(texts[0:120000, 2])
+
+svd_matrix = svd_transformer.fit_transform(texts_train)
+
+#query = texts_train[1]
+#query_vector = svd_transformer.transform([texts_train[0], texts_train[1]])
+
+print(query_vector)
+print(np.shape(query_vector))

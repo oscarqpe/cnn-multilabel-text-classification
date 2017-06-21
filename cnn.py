@@ -14,9 +14,9 @@ class Cnn:
 		self.n_classes = config.label_size # reuters total classes
 		self.dropout = 0.5 # Dropout, probability to keep units
 		self.output_conv = 256
-		self.hidden_size = 2048
+		self.hidden_size = 1024
 		self.gaussian = 0.05
-		self.gaussian_h = 0.02
+		self.gaussian_h = 0.05
 		# tf Graph input
 		self.x = tf.placeholder(tf.float32, [None, self.n_input])
 		self.y = tf.placeholder(tf.float32, [None, self.n_classes])
@@ -33,7 +33,7 @@ class Cnn:
 			'wc6': tf.Variable(tf.random_normal([3, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc6"),
 			# fully connected, 7*7*64 inputs, self.output_conv outputs
 			'wd1': tf.Variable(tf.random_normal([34 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd1"),
-			#'wd2': tf.Variable(tf.random_normal([self.hidden_size, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd2"),
+			'wd2': tf.Variable(tf.random_normal([self.hidden_size, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd2"),
 			# 1024 inputs, 10 outputs (class prediction)
 			'out': tf.Variable(tf.random_normal([self.hidden_size, config.label_size], mean=0.0, stddev=self.gaussian_h), name="out")
 		}
@@ -45,7 +45,7 @@ class Cnn:
 			'bc5': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc5"),
 			'bc6': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc6"),
 			'bd1': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd1"),
-			#'bd2': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd2"),
+			'bd2': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd2"),
 			'out': tf.Variable(tf.random_normal([config.label_size], mean=0.0, stddev=self.gaussian_h), name="bout")
 		}
 	# Create some wrappers for simplicity
@@ -103,7 +103,7 @@ class Cnn:
 		print(fc1.shape)
 		fc1 = tf.nn.dropout(fc1, dropout)
 		print(fc1.shape)
-		'''
+		
 		fc2 = tf.reshape(fc1, [-1, weights['wd2'].get_shape().as_list()[0]])
 		#print fc2
 		fc2 = tf.add(tf.matmul(fc2, weights['wd2']), biases['bd2'])
@@ -112,8 +112,8 @@ class Cnn:
 		fc2 = tf.nn.dropout(fc2, dropout)
 		#print(fc2)
 		# Output, class prediction
-		'''
-		out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
+		
+		out = tf.add(tf.matmul(fc2, weights['out']), biases['out'])
 		print(out.shape)
 		out = tf.nn.sigmoid(out)
 		return out

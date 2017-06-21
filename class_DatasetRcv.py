@@ -15,7 +15,7 @@ class Dataset:
 		self.texts_train = []
 		self.labels_train = []
 		self.batch = batch
-		self.total_texts = 20736#23040# 23149
+		self.total_texts = 23040#20736#23040# 23149
 		# test 0
 		self.total_test = 2304#19968#20000
 		self.start = 0

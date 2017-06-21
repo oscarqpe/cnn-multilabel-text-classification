@@ -11,7 +11,7 @@ class Embedding:
 		#self.learning_rate = tf.train.exponential_decay(self.starter_learning_rate, self.global_step, 10000, 0.0096, staircase=True)
 		# Network Parameters
 		self.n_input = config.to_embedding # to_embedding
-		self.embedding = 256
+		self.embedding = 32
 		self.num_filters = 256
 		self.n_classes = config.label_size # reuters total classes
 		self.dropout = 0.5 # Dropout, probability to keep units
@@ -26,7 +26,7 @@ class Embedding:
 		# Store layers weight & bias
 		self.weights = {
 			# embedding
-			'emb': tf.Variable(tf.random_uniform([self.n_input, self.embedding], -1.0, 1.0), name="emb"),
+			'emb': tf.Variable(tf.random_uniform([124163, self.embedding], -1.0, 1.0), name="emb"),
 			# vocabulary_size x 7 conv, 1 input, 256 outputs
 			'wc1': tf.Variable(tf.random_normal([self.filters[0], self.embedding, 1, self.num_filters], mean=0.0, stddev=self.gaussian), name="wc1"),
 			# 5x5 conv, 32 inputs, 64 outputs
@@ -48,22 +48,28 @@ class Embedding:
 		}
 
 	def network(self, x, weights, biases, dropout):
-		
+		print(np.shape(x))
 		embedded_chars = tf.nn.embedding_lookup(weights['emb'], x)
 		embedded_chars_expanded = tf.expand_dims(embedded_chars, -1)
 		pool = []
 		conv1 = tf.nn.conv2d(embedded_chars_expanded, weights['wc1'], strides=[1, 1, 1, 1], padding="VALID", name="conv1")
 		pool1 = tf.nn.relu(tf.nn.bias_add(conv1, biases['bc1']), name="relu")
 		pool1 = tf.nn.max_pool(pool1, ksize=[1, self.n_input - self.filters[0] + 1, 1, 1],strides=[1, 1, 1, 1],padding='VALID',name="pool1")
+		print(np.shape(pool1))
 		pool.append(pool1)
+		print(np.shape(pool))
 		conv2 = tf.nn.conv2d(embedded_chars_expanded, weights['wc2'], strides=[1, 1, 1, 1], padding="VALID", name="conv1")
 		pool2 = tf.nn.relu(tf.nn.bias_add(conv2, biases['bc2']), name="relu")
 		pool2 = tf.nn.max_pool(pool2, ksize=[1, self.n_input - self.filters[1] + 1, 1, 1],strides=[1, 1, 1, 1],padding='VALID',name="pool2")
+		print(np.shape(pool2))
 		pool.append(pool2)
+		print(np.shape(pool))
 		conv3 = tf.nn.conv2d(embedded_chars_expanded, weights['wc3'], strides=[1, 1, 1, 1], padding="VALID", name="conv1")
 		pool3 = tf.nn.relu(tf.nn.bias_add(conv3, biases['bc3']), name="relu")
 		pool3 = tf.nn.max_pool(pool3, ksize=[1, self.n_input - self.filters[2] + 1, 1, 1],strides=[1, 1, 1, 1],padding='VALID',name="pool3")
+		print(np.shape(pool3))
 		pool.append(pool3)
+		print(np.shape(pool))
 		num_filters_total = self.num_filters * 3
 		print("filters total:", num_filters_total)
 		h_pool = tf.concat(pool, 3)

@@ -11,7 +11,7 @@ global to_embedding
 global dictionary_size
 # RCV1
 #dictionary_size = 47236 # default
-#dictionary_size = 85913 # bow
+dictionary_size = 85913 # bow
 #dictionary_size = 85913 # tfidf
 #dictionary_size = 47115 # bow_stemm
 #dictionary_size = 47115 # bow_stemm_tfidf
@@ -23,7 +23,7 @@ to_embedding = 8502
 #dictionary_size = 55443 # bow_stemm_tfidf
 
 # AGNEWS
-dictionary_size = 60619 # bow
+#dictionary_size = 60619 # bow
 #dictionary_size = 60619 # tfidf
 #dictionary_size = 73964 # bow_stemm
 #dictionary_size = 73964 # bow_stemm_tfidf

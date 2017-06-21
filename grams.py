@@ -47,9 +47,9 @@ correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 data = ds.Dataset(path, config.batch_size)
 data.read_labels() # bibtex, RCV
 #data.all_data() # AgNews
-#data.read_text(0, 19968)
+data.read_text(0, 23149)
 stop_words = get_stop_words('en')
-'''
+
 vectorizer1 = TfidfVectorizer(min_df=1, stop_words = stop_words, max_features=1932, ngram_range=(1, 1)) #tfidf
 vectorizer2 = TfidfVectorizer(min_df=1, stop_words = stop_words, max_features=1932, ngram_range=(2, 2)) #tfidf
 vectorizer3 = TfidfVectorizer(min_df=1, stop_words = stop_words, max_features=1932, ngram_range=(3, 3)) #tfidf
@@ -67,11 +67,11 @@ pickle.dump(vectorizer4, open("data/rcv1-2/vectorizer/vectorizer_4gram.pickle", 
 
 print(vectorizer1.vocabulary_)
 print("Vocabulary: ", len(vectorizer1.vocabulary_))
-'''
-vectorizer1 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_1gram.pickle", "rb"))
-vectorizer2 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_2gram.pickle", "rb"))
-vectorizer3 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_3gram.pickle", "rb"))
-vectorizer4 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_4gram.pickle", "rb"))
+
+#vectorizer1 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_1gram.pickle", "rb"))
+#vectorizer2 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_2gram.pickle", "rb"))
+#vectorizer3 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_3gram.pickle", "rb"))
+#vectorizer4 = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_4gram.pickle", "rb"))
 #data.next_batch()
 #data.generate_batch_text()
 
@@ -114,7 +114,7 @@ with tf.Session() as sess:
 	data.shuffler()
 	t = time.asctime()
 	print (t)
-	train = True
+	train = False
 	if train == True:
 		while step * config.batch_size <= config.training_iters:
 			data.next_batch()
