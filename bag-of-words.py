@@ -8,8 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 import config
 import utils
-utils.read_labels("rcv")
-import class_DatasetRcv as ds
+#utils.read_labels("rcv")
+import class_DatasetAgN as ds
 import mlp as ml
 import lemma_tokenizer as lt
 from stop_words import get_stop_words
@@ -47,8 +47,8 @@ elif env == "server":
 	path = "/home/citeclabs/oscarqpe/cnn-multilabel-text-classification/data/reuters/"
 data = ds.Dataset(path, config.batch_size)
 
-data.read_rcv_vectors() # bibtext, rcv
-#data.all_data() # agnews
+#data.read_rcv_vectors() # bibtext, rcv
+data.all_data() # agnews
 #vectorizer.fit(list(data.texts[0:120000,2]))
 #print("Vocabulary: ", len(vectorizer.vocabulary_))
 #data.read_rcv_vectors_test(0)
@@ -62,8 +62,8 @@ print(len(vectorizer.vocabulary_))
 #pickle.dump(vectorizer, open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
 #vectorizer = pickle.load(open("data/bibtex/over200/vectorizer/vectorizer_bow.pickle", "rb"))
-#vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_bow.pickle", "rb"))
-vectorizer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_bow.pickle", "rb"))
+vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_bow.pickle", "rb"))
+#vectorizer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_bow.pickle", "rb"))
 #print(vectorizer.vocabulary_)
 
 t = time.asctime()
@@ -77,7 +77,7 @@ with tf.Session(config=config_tf) as sess:
 	t = time.asctime()
 	print (t)
 	model_saving = 2
-	saver.restore(sess, "mlp_weights/model1_bow.ckpt")
+	saver.restore(sess, "mlp_weights_agnews/model2_bow.ckpt")
 	train = True
 	if train == True:
 		step = 1
@@ -88,7 +88,7 @@ with tf.Session(config=config_tf) as sess:
 		while step * config.batch_size <= config.training_iters:
 			data.next_batch()
 			#data.generate_batch() # vectors
-			data.generate_batch_text() # entire text
+			data.generate_batch() # entire text
 			#print data.texts_train.shape
 			#print config.batch_size
 			batch_x = vectorizer.transform(data.texts_train).toarray() # vectors
@@ -104,7 +104,7 @@ with tf.Session(config=config_tf) as sess:
 			
 			sess.run(optimizer, feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: mlp.dropout})
 
-			if step % 20 == 0:
+			if step % 1 == 0:
 				#print Get Accuracy: "
 				loss = sess.run([cost], feed_dict={mlp.x: batch_x, mlp.y: batch_y, mlp.keep_prob: 1.})
 				#print loss
@@ -131,8 +131,8 @@ with tf.Session(config=config_tf) as sess:
 		
 		data = None
 		data = ds.Dataset(path, config.batch_size)
-		data.read_labels_test(0) # bibtext, RCV
-		#data.all_data_test() # agnews
+		#data.read_labels_test(0) # bibtext, RCV
+		data.all_data_test() # agnews
 		print("TESTING")
 		step = 0
 		total_test = data.total_texts
@@ -147,8 +147,8 @@ with tf.Session(config=config_tf) as sess:
 		while step * config.batch_size < total_test:
 			data.next_batch()
 			#data.read_data()
-			#data.generate_batch_text()
-			data.generate_batch_test_text()
+			data.generate_batch()
+			#data.generate_batch_test_text()
 			#print data.texts_train.shape
 			#print config.batch_size
 			batch_x = vectorizer.transform(data.texts_train).toarray()

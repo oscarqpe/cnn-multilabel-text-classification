@@ -54,10 +54,15 @@ class Dataset:
 	def generate_batch(self):
 		start = self.start
 		end = self.end
-		self.texts_train = [np.array([])]
+		self.texts_train = []
 		self.labels_train = []
 		#print(self.texts[start:end, 2])
-		self.texts_train = list(self.texts[start:end, 2])
+		#self.texts_train = list(self.texts[start:end, 2])
+		titles = list(self.texts[start:end, 1])
+		texts = list(self.texts[start:end, 2])
+		for i in range(0, len(texts)):
+			text = titles[i] + " " + texts[i]
+			self.texts_train.append(text)
 		labels = list(self.texts[start: end, 0])
 		for i in range(0, len(labels)):
 			if labels[i] == '1':
@@ -121,6 +126,17 @@ class Dataset:
 			reader = csv.reader(f)
 			self.texts = list(reader)
 			self.texts = np.array(self.texts)
+	def all_data_vectorizer(self):
+		with open('data/ag_news/train.csv', 'r') as f:
+			reader = csv.reader(f)
+			self.texts = list(reader)
+			self.texts = np.array(self.texts)
+		titles = list(self.texts[0:120000, 1])
+		texts = list(self.texts[0:120000, 2])
+		self.texts = []
+		for i in range(0, len(texts)):
+			text = titles[i] + " " + texts[i]
+			self.texts.append(text)
 	def all_data_test(self):
 		self.total_texts = 7552
 		with open('data/ag_news/test.csv', 'r') as f:

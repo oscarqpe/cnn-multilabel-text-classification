@@ -6,9 +6,9 @@ import sys
 import pickle
 import config
 import utils
-#utils.read_labels("bibtex")
-import class_DatasetAgN as ds
-import cnn as cn
+utils.read_labels("rcv")
+import class_DatasetRcv as ds
+import mlp as cn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
@@ -28,7 +28,7 @@ if env == "local":
 elif env == "server":
     path = "data/reuters/"
 
-cnn = cn.Cnn()
+cnn = cn.Mlp()
 # Construct model
 pred = cnn.network(cnn.x, cnn.weights, cnn.biases, cnn.dropout)
 
@@ -43,9 +43,10 @@ correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
-#data.read_labels() # bibtex, RCV
-data.all_data() # AgNews
-
+data.read_labels() # bibtex, RCV
+#data.all_data() # AgNews
+#data.all_data_vectorizer() # AgNews
+#data.read_text(0, 23040)
 stop_words = get_stop_words('en')
 vectorizer = TfidfVectorizer(stop_words=stop_words, 
                              use_idf=True, 
@@ -56,11 +57,13 @@ svd_model = TruncatedSVD(n_components=1014,
 
 svd_transformer = Pipeline([('tfidf', vectorizer), 
                             ('svd', svd_model)])
-texts_train = list(data.texts[0:120000, 2])
-#svd_transformer.fit_transform(texts_train)
+#texts_train = list(data.texts[0:120000, 2])
+#print(np.shape(data.texts))
+#print(data.texts[0])
+#svd_transformer.fit_transform(data.texts)
 
-#pickle.dump(svd_transformer, open("data/ag_news/vectorizer/vectorizer_lsi.pickle", "wb"))
-svd_transformer = pickle.load(open("data/ag_news/vectorizer/vectorizer_lsi.pickle", "rb"))
+#pickle.dump(svd_transformer, open("data/ag_news/vectorizer/vectorizer_lsi2.pickle", "wb"))
+svd_transformer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_lsi.pickle", "rb"))
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
@@ -76,19 +79,20 @@ with tf.Session(config=config_tf) as sess:
     step = 1
     # Keep training until reach max iterations
     epoch = 1
-    model_saving = 5
+    model_saving = 10
     print("Epoch: " + str(epoch))
-    saver.restore(sess, "cnn_weights_agnews/model_cnn_5.ckpt")
+    saver.restore(sess, "mlp_weights/model_lsi_5.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 256#640000 # 5000 * 128
+    config.training_iters = 2560#640000 # 5000 * 128
     data.shuffler()
+    print("TOTAL Training: ", data.total_texts)
     train = True
     if train == True:
         while step * config.batch_size <= config.training_iters:
             data.next_batch()
-            data.generate_batch()
+            data.generate_batch_text()
             #print data.texts_train.shape
             #print config.batch_size
             #batch_x = np.array(data.texts_train)
@@ -125,7 +129,7 @@ with tf.Session(config=config_tf) as sess:
                 print("Epoch: " + str(epoch))
                 data.shuffler()
             if step % 5000 == 0:
-                save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
+                save_path = saver.save(sess, "mlp_weights_agnews/model_lsi2_" + str(model_saving) + ".ckpt")
                 model_saving += 1
             step += 1
         print(plot_x)
@@ -133,8 +137,8 @@ with tf.Session(config=config_tf) as sess:
         print ("TESTING")
         data = None
         data = ds.Dataset(path, config.batch_size)
-        #data.read_labels() # bibtext, RCV
-        data.all_data_test() # AgNEWS
+        data.read_labels_test(0) # bibtext, RCV
+        #data.all_data_test() # AgNEWS
         step = 1
         total_test = data.total_texts
         print (total_test)
@@ -147,7 +151,7 @@ with tf.Session(config=config_tf) as sess:
         while step * config.batch_size <= total_test:
             data.next_batch()
             #data.read_data()
-            data.generate_batch()
+            data.generate_batch_test_text()
             #print data.texts_train.shape
             #print config.batch_size
             #batch_x = np.array(data.texts_train)
