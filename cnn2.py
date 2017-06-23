@@ -13,7 +13,7 @@ class Cnn:
 		self.n_input = config.vocabulary_size * config.max_characters # vocabulary * text character size (img shape: l * 924)
 		self.n_classes = config.label_size # reuters total classes
 		self.dropout = 0.5 # Dropout, probability to keep units
-		self.output_conv = 16
+		self.output_conv = 32
 		self.hidden_size = 2048
 		self.gaussian = 0.05
 		self.gaussian_h = 0.02
@@ -26,17 +26,17 @@ class Cnn:
 			# vocabulary_size x 7 conv, 1 input, 128 outputs
 			'wc1': tf.Variable(tf.random_normal([7, config.vocabulary_size, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc1"),
 			# 5x5 conv, 32 inputs, 64 outputs
-			'wc2': tf.Variable(tf.random_normal([7, 1, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc2"),
-			'wc3': tf.Variable(tf.random_normal([7, 1, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc3"),
+			'wc2': tf.Variable(tf.random_normal([7, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc2"),
+			#'wc3': tf.Variable(tf.random_normal([7, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc3"),
 			# fully connected, 7*7*64 inputs, 1024 outputs
-			'wd1': tf.Variable(tf.random_normal([336 * 3 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd3"),
+			'wd1': tf.Variable(tf.random_normal([110 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd3"),
 			# 1024 inputs, 10 outputs (class prediction)
 			'out': tf.Variable(tf.random_normal([self.hidden_size, config.label_size], mean=0.0, stddev=self.gaussian_h), name="out")
 		}
 		self.biases = {
 			'bc1': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc1"),
 			'bc2': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc2"),
-			'bc3': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc3"),
+			#'bc3': tf.Variable(tf.random_normal([self.output_conv], mean=0.0, stddev=self.gaussian), name="bc3"),
 			'bd1': tf.Variable(tf.random_normal([self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="bd1"),
 			'out': tf.Variable(tf.random_normal([config.label_size], mean=0.0, stddev=self.gaussian_h), name="bout")
 		}
@@ -61,46 +61,36 @@ class Cnn:
 		#da = tf.reshape(x, [-1])
 		#print(da)
 		input_data = tf.reshape(x, shape=[-1, config.max_characters, config.vocabulary_size])
-		print(np.shape(input_data))
+		print(input_data.shape)
 		#input_data = tf.Variable(da.astype(np.float32))
-		pool = []
+		
 		conv1 = self.convolution_1d(input_data, weights['wc1'], biases['bc1'], strides=1)
-		print(np.shape(conv1))
+		print(conv1.shape)
 		conv1 = self.max_pool_1d(conv1, config.max_characters - 7 + 1, self.output_conv, 3)
-		print(np.shape(conv1))
-		pool.append(conv1)
-		print(np.shape(pool))
-		conv2 = self.convolution_1d(input_data, weights['wc2'], biases['bc2'], strides=1)
-		print(np.shape(conv2))
-		conv2 = self.max_pool_1d(conv2, config.max_characters - 7 + 1, self.output_conv, 3)
-		print(np.shape(conv2))
-		pool.append(conv2)
-		print(np.shape(pool))
-		conv3 = self.convolution_1d(input_data, weights['wc3'], biases['bc3'], strides=1)
-		print(np.shape(conv3))
-		conv3 = self.max_pool_1d(conv3, config.max_characters - 7 + 1, self.output_conv, 3)
-		print(np.shape(conv3))
-		pool.append(conv3)
-		print(np.shape(pool))
+		print(conv1.shape)
 
-		h_pool = tf.concat(pool, 2)
-		print("FINAL POOL")
-		print(np.shape(h_pool))
-		h_pool_flat = tf.reshape(h_pool, [-1, 336 * 3 * self.output_conv])
-		print(np.shape(h_pool_flat))
+		conv2 = self.convolution_1d(conv1, weights['wc2'], biases['bc2'], strides=1)
+		print(conv2.shape)
+		conv2 = self.max_pool_1d(conv2, 336 - 7 + 1, self.output_conv, 3)
+		print(conv2.shape)
 
-		# Fully connected layer
-		# Reshape conv2 output to fit fully connected layer input
-		#print(weights['wd1'])
-		fc1 = tf.reshape(pool, [-1, weights['wd1'].get_shape().as_list()[0]])
-		print(np.shape(fc1))
+		fc1 = tf.reshape(conv2, [-1, weights['wd1'].get_shape().as_list()[0]])
+		print(fc1.shape)
 		fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
 		fc1 = tf.nn.relu(fc1)
-		print(np.shape(fc1))
+		print(fc1.shape)
 		fc1 = tf.nn.dropout(fc1, dropout)
-
+		'''
+		fc2 = tf.reshape(fc1, [-1, weights['wd2'].get_shape().as_list()[0]])
+		#print fc2
+		fc2 = tf.add(tf.matmul(fc2, weights['wd2']), biases['bd2'])
+		fc2 = tf.nn.relu(fc2)
+		#print(fc2)
+		fc2 = tf.nn.dropout(fc2, dropout)
+		#print(fc2)
+		# Output, class prediction
+		'''
 		out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
-		#print out
+		print(out.shape)
 		out = tf.nn.sigmoid(out)
-		print(np.shape(out))
 		return out
