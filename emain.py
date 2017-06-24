@@ -39,16 +39,16 @@ correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
-#data.read_labels() # bibtex, RCV
+data.read_labels() # bibtex, RCV
 #data.read_text(0, 23149)
-data.all_data_vectorizer()
-max_document_length = max([len(x.split(" ")) for x in data.texts])
-print(max_document_length)
-config.to_embedding = max_document_length
+
+#max_document_length = max([len(x.split(" ")) for x in data.texts])
+#print(max_document_length)
+#config.to_embedding = max_document_length
 vocab_processor = learn.preprocessing.VocabularyProcessor(config.to_embedding)
 #print(data.texts[0])
-data.texts = np.array(list(vocab_processor.fit_transform(data.texts)))
-print(len(vocab_processor.vocabulary_))
+#data.texts = np.array(list(vocab_processor.fit_transform(data.texts)))
+#print(len(vocab_processor.vocabulary_))
 #print(x[0])
 
 #data.all_data() # AgNews
@@ -76,7 +76,7 @@ with tf.Session(config=c) as sess:
 	data.shuffler()
 	t = time.asctime()
 	print (t)
-	train = True
+	train = False
 	if train == True:
 		while step * config.batch_size <= config.training_iters:
 			data.next_batch()

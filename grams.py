@@ -96,21 +96,21 @@ saver = tf.train.Saver()
 c = tf.ConfigProto(device_count = {'GPU': 0})
 #c = tf.ConfigProto()
 #c.gpu_options.visible_device_list = "0,1"
-with tf.Session(config=c) as sess:
-#with tf.Session() as sess:
+#with tf.Session(config=c) as sess:
+with tf.Session() as sess:
 	sess.run(init)
 	#print(sess.run("{:.5f}".format(cnn.weights['wc1'])))
 	print("TRAINING")
 	step = 1
 	# Keep training until reach max iterations
 	epoch = 1
-	model_saving = 0
+	model_saving = 1
 	print("Epoch: " + str(epoch))
-	#saver.restore(sess, "cnn_weights/model_cnn5_3_mll.ckpt")
+	#saver.restore(sess, "cnn_weights/model_cnn_grams_0_word.ckpt")
 	#data.shuffler()
 	plot_x = []
 	plot_y = []
-	config.training_iters = 640000 # 5000 * 128
+	config.training_iters = 128#640000 # 5000 * 128
 	data.shuffler()
 	t = time.asctime()
 	print (t)
@@ -142,7 +142,7 @@ with tf.Session(config=c) as sess:
 			#print(ou.shape)
 			sess.run(optimizer, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: cnn.dropout})
 
-			if step % 20 == 0:
+			if step % 1 == 0:
 				#print "Get Accuracy: "
 				loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
 				#print loss
@@ -193,7 +193,7 @@ with tf.Session(config=c) as sess:
 		while step * config.batch_size <= total_test:
 			data.next_batch()
 			#data.read_data()
-			data.generate_batch_text()
+			data.generate_batch_test_text()
 			#print data.texts_train.shape
 			#print config.batch_size
 			#batch_x = np.array(data.texts_train)

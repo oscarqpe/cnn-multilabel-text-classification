@@ -5,7 +5,7 @@ import config
 class Cnn:
 	def __init__ (self) :
 		# Parameters
-		self.learning_rate = 0.001
+		self.learning_rate = 0.0003
 		#self.global_step = tf.Variable(0, trainable=False)
 		#self.starter_learning_rate = 0.001
 		#self.learning_rate = tf.train.exponential_decay(self.starter_learning_rate, self.global_step, 10000, 0.0096, staircase=True)
@@ -16,7 +16,7 @@ class Cnn:
 		self.output_conv = 256
 		self.hidden_size = 2048
 		self.gaussian = 0.05
-		self.gaussian_h = 0.02
+		self.gaussian_h = 0.05
 		# tf Graph input
 		self.x = tf.placeholder(tf.float32, [None, self.n_input])
 		self.y = tf.placeholder(tf.float32, [None, self.n_classes])
@@ -102,7 +102,6 @@ class Cnn:
 		fc1 = tf.nn.relu(fc1)
 		print(fc1.shape)
 		fc1 = tf.nn.dropout(fc1, dropout)
-		print(fc1.shape)
 		'''
 		fc2 = tf.reshape(fc1, [-1, weights['wd2'].get_shape().as_list()[0]])
 		#print fc2
