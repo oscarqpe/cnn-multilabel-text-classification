@@ -14,6 +14,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 from stop_words import get_stop_words
 from sklearn.metrics import pairwise_distances
+import gensim.models as models
 
 env = sys.argv[1]
 config.dictionary_size = 1014
@@ -46,12 +47,11 @@ data = ds.Dataset(path, config.batch_size)
 #data.read_labels() # bibtex, RCV
 #data.all_data() # AgNews
 data.all_data_vectorizer() # AgNews
-#data.read_text(0, 199328)
+#data.read_text(0, 23040)
 stop_words = get_stop_words('en')
 vectorizer = TfidfVectorizer(stop_words=stop_words, 
                              use_idf=True, 
-                             smooth_idf=True,
-                             ngram_range=(2, 2))
+                             smooth_idf=True)
 svd_model = TruncatedSVD(n_components=1014, 
                          algorithm='randomized',
                          n_iter=10, random_state=42)
@@ -61,10 +61,15 @@ svd_transformer = Pipeline([('tfidf', vectorizer),
 #texts_train = list(data.texts[0:120000, 2])
 #print(np.shape(data.texts))
 #print(data.texts[0])
-svd_transformer.fit_transform(data.texts)
+#svd_transformer.fit_transform(data.texts)
+model = models.Word2Vec(data.texts, size=100, window=5, min_count=5, workers=4)
+model.save("data/ag_news/vectorizer/model_w2v.bin")
+#model = models.Word2Vec.load("data/ag_news/vectorizer/model_w2v.bin")
+e = model.wv['black']
+print(e)
 
-pickle.dump(svd_transformer, open("data/agnews/vectorizer/vectorizer_lsi_2grams.pickle", "wb"))
-#svd_transformer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_lsi2.pickle", "rb"))
+#pickle.dump(svd_transformer, open("data/ag_news/vectorizer/vectorizer_lsi2.pickle", "wb"))
+#svd_transformer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_lsi.pickle", "rb"))
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
@@ -82,11 +87,11 @@ with tf.Session(config=config_tf) as sess:
     epoch = 1
     model_saving = 10
     print("Epoch: " + str(epoch))
-    #saver.restore(sess, "mlp_weights/model_lsi_5.ckpt")
+    saver.restore(sess, "mlp_weights/model_lsi_5.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 2560000 # 5000 * 128
+    config.training_iters = 640000 # 5000 * 128
     data.shuffler()
     print("TOTAL Training: ", data.total_texts)
     train = False
@@ -107,7 +112,7 @@ with tf.Session(config=config_tf) as sess:
             #print("Y shape: ", batch_y.shape)
             sess.run(optimizer, feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: cnn.dropout})
 
-            if step % 20 == 0:
+            if step % 1 == 0:
                 #print "Get Accuracy: "
                 loss = sess.run([cost], feed_dict={cnn.x: batch_x, cnn.y: batch_y, cnn.keep_prob: 1.})
                 #print loss
@@ -130,7 +135,7 @@ with tf.Session(config=config_tf) as sess:
                 print("Epoch: " + str(epoch))
                 data.shuffler()
             if step % 5000 == 0:
-                save_path = saver.save(sess, "mlp_weights/model_lsi2_" + str(model_saving) + ".ckpt")
+                save_path = saver.save(sess, "mlp_weights_agnews/model_lsi2_" + str(model_saving) + ".ckpt")
                 model_saving += 1
             step += 1
         print(plot_x)

@@ -15,9 +15,9 @@ class Dataset:
 		self.texts_train = []
 		self.labels_train = []
 		self.batch = batch
-		self.total_texts = 23040# 23149
+		self.total_texts = 199296#199328#23040# 23149
 		# test 0
-		self.total_test = 19968#20000
+		self.total_test = 23040#19968#20000
 		self.start = 0
 		self.end = 0
 		self.start_test = 0
@@ -221,7 +221,7 @@ class Dataset:
 					print("Not have label: ", split_labels[j])
 			self.labels_train = np.append(self.labels_train, labels_temp)
 			text_name = str(id) + "newsML.xml"
-			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			reuters = et.parse("data/rcv1-2/test-text0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
 			temp_text = ""
 			for text in reuters.findall("title"):
 				#print(text.text)
@@ -285,7 +285,7 @@ class Dataset:
 					print("Not have label: ", split_labels[j])
 			self.labels_train = np.append(self.labels_train, labels_temp)
 			text_name = str(id) + "newsML.xml"
-			reuters = et.parse("data/rcv1-2/test-text0-0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
 			temp_text = ""
 			for text in reuters.findall("title"):
 				#print(text.text)
@@ -359,7 +359,7 @@ class Dataset:
 			#print(self.names[i])
 			self.read_data(self.names[i], type)
 	def read_rcv_vectors(self):
-		with open('data/rcv1-2/ids_index_train.txt', 'r') as f:
+		with open('data/rcv1-2/ids_index_test0.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.ids = np.array(list(reader))
 		'''
@@ -372,7 +372,7 @@ class Dataset:
 		'''
 		
 		self.data = np.array([])
-		with open('data/rcv1-2/labels_train.txt', 'r') as f:
+		with open('data/rcv1-2/labels_test0.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.labels = list(reader)
 			self.labels = np.array(self.labels)
@@ -393,17 +393,18 @@ class Dataset:
 				target.write(lines[i])
 				target.close()
 	def read_labels(self):
-		with open('data/rcv1-2/ids_index_train.txt', 'r') as f:
+		with open('data/rcv1-2/ids_index_test0.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.ids = np.array(list(reader))
-		with open('data/rcv1-2/labels_train.txt', 'r') as f:
+		with open('data/rcv1-2/labels_test0.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.labels = list(reader)
 			self.labels = np.array(self.labels)
 
 	def read_labels_test(self, test):
-		self.total_texts = 19968#20000
-		with open('data/rcv1-2/ids_index_test0_' + str(test) + '.txt', 'r') as f:
+		self.total_texts = 23040#19968#20000
+		#with open('data/rcv1-2/ids_index_test0_' + str(test) + '.txt', 'r') as f:
+		with open('data/rcv1-2/ids_index_train.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.ids = np.array(list(reader))
 		'''
@@ -414,7 +415,7 @@ class Dataset:
 			target.write("\n")
 		target.close()
 		'''
-		with open('data/rcv1-2/labels_test0_' + str(test) + '.txt', 'r') as f:
+		with open('data/rcv1-2/labels_train.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.labels = np.array(list(reader))
 
@@ -442,7 +443,7 @@ class Dataset:
 				flag = id_
 		target.close()
 	def read_text(self, init, end):
-		with open('data/rcv1-2/ids_index_train.txt', 'r') as f:
+		with open('data/rcv1-2/ids_index_test0.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.ids = np.array(list(reader))
 		self.texts = []
@@ -450,7 +451,7 @@ class Dataset:
 			ids_index = self.ids[i][0].split(" ")
 			id = int(ids_index[0])
 			text_name = str(id) + "newsML.xml"
-			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			reuters = et.parse("data/rcv1-2/test-text0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
 			temp_text = ""
 			for text in reuters.findall("title"):
 				#print(text.text)

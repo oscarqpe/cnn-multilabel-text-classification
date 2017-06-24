@@ -27,4 +27,6 @@ __pycache__/*
 multi-class/__pycache__/*
 .ipynb_checkpoints/
 /cnn_weights_agnews/*
+/results.txt
+./results.txt
 results.txt

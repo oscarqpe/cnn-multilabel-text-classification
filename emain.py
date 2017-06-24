@@ -5,8 +5,8 @@ import time
 import sys
 import config
 import utils
-utils.read_labels("rcv")
-import class_DatasetRcv as ds
+#utils.read_labels("rcv")
+import class_DatasetAgN as ds
 import embedding as cn
 from tensorflow.contrib import learn
 if len(sys.argv) > 1:
@@ -39,12 +39,12 @@ correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
-data.read_labels() # bibtex, RCV
-data.read_text(0, 23149)
-
-#max_document_length = max([len(x.split(" ")) for x in data.texts])
-#print(max_document_length)
-#config.to_embedding = max_document_length
+#data.read_labels() # bibtex, RCV
+#data.read_text(0, 23149)
+data.all_data_vectorizer()
+max_document_length = max([len(x.split(" ")) for x in data.texts])
+print(max_document_length)
+config.to_embedding = max_document_length
 vocab_processor = learn.preprocessing.VocabularyProcessor(config.to_embedding)
 #print(data.texts[0])
 data.texts = np.array(list(vocab_processor.fit_transform(data.texts)))
@@ -118,7 +118,7 @@ with tf.Session(config=c) as sess:
 				data.shuffler()
 			if step % 2500 == 0:
 				#save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + ".ckpt")
-				save_path = saver.save(sess, "cnn_weights_agnews/model_cnn_" + str(model_saving) + "_mll.ckpt")
+				save_path = saver.save(sess, "cnn_weights_agnews/model_emb_" + str(model_saving) + ".ckpt")
 				model_saving += 1
 			step += 1
 		print(plot_x)
@@ -128,8 +128,8 @@ with tf.Session(config=c) as sess:
 		print ("TESTING")
 		data = None
 		data = ds.Dataset(path, config.batch_size)
-		data.read_labels() # bibtext, RCV
-		#data.all_data_test() # AgNEWS
+		#data.read_labels() # bibtext, RCV
+		data.all_data_test() # AgNEWS
 		step = 1
 		total_test = data.total_texts
 		print (total_test)

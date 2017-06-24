@@ -14,6 +14,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 from stop_words import get_stop_words
 from sklearn.metrics import pairwise_distances
+from sklearn.decomposition import LatentDirichletAllocation
 
 env = sys.argv[1]
 config.dictionary_size = 1014
@@ -50,8 +51,7 @@ data.all_data_vectorizer() # AgNews
 stop_words = get_stop_words('en')
 vectorizer = TfidfVectorizer(stop_words=stop_words, 
                              use_idf=True, 
-                             smooth_idf=True,
-                             ngram_range=(2, 2))
+                             smooth_idf=True)
 svd_model = TruncatedSVD(n_components=1014, 
                          algorithm='randomized',
                          n_iter=10, random_state=42)
@@ -61,10 +61,17 @@ svd_transformer = Pipeline([('tfidf', vectorizer),
 #texts_train = list(data.texts[0:120000, 2])
 #print(np.shape(data.texts))
 #print(data.texts[0])
-svd_transformer.fit_transform(data.texts)
-
-pickle.dump(svd_transformer, open("data/agnews/vectorizer/vectorizer_lsi_2grams.pickle", "wb"))
+#svd_transformer.fit_transform(data.texts)
+lda = LatentDirichletAllocation(n_topics=50, max_iter=10, 
+                                learning_method='online',                 
+                                learning_offset=50., random_state=42)
+tf = vectorizer.fit_transform(data.texts)
+lda.fit(tf)
+print(vectorizer.get_feature_names())
+#lda.print_topics(20)
+#pickle.dump(svd_transformer, open("data/agnews/vectorizer/vectorizer_lsi_2grams.pickle", "wb"))
 #svd_transformer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_lsi2.pickle", "rb"))
+
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 

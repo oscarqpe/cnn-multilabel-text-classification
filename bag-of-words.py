@@ -62,7 +62,7 @@ print(len(vectorizer.vocabulary_))
 #pickle.dump(vectorizer, open("data/ag_news/vectorizer/vectorizer_tfidf_stemm.pickle", "wb"))
 
 #vectorizer = pickle.load(open("data/bibtex/over200/vectorizer/vectorizer_bow.pickle", "rb"))
-vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_bow.pickle", "rb"))
+vectorizer = pickle.load(open("data/ag_news/vectorizer/vectorizer_tfidf.pickle", "rb"))
 #vectorizer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_bow.pickle", "rb"))
 #print(vectorizer.vocabulary_)
 
@@ -76,8 +76,8 @@ with tf.Session(config=config_tf) as sess:
 	sess.run(init)
 	t = time.asctime()
 	print (t)
-	model_saving = 2
-	saver.restore(sess, "mlp_weights_agnews/model2_bow.ckpt")
+	model_saving = 5
+	saver.restore(sess, "mlp_weights_agnews/model4_tfidf.ckpt")
 	train = True
 	if train == True:
 		step = 1

@@ -23,11 +23,11 @@ to_embedding = 8502
 #dictionary_size = 55443 # bow_stemm_tfidf
 
 # AGNEWS
-#dictionary_size = 60619 # bow
+dictionary_size = 60619 # bow
 #dictionary_size = 60619 # tfidf
 #dictionary_size = 73964 # bow_stemm
 #dictionary_size = 73964 # bow_stemm_tfidf
-dictionary_size = 1014 # lsi
+#dictionary_size = 1014 # lsi
 global vocabulary  
 
 vocabulary = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',

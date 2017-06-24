@@ -50,7 +50,28 @@ class Dataset:
 		else:
 			self.end = self.start
 			self.start = self.start - self.batch
-
+	def generate_embedding (self):
+		start = self.start
+		end = self.end
+		self.texts_train = []
+		self.labels_train = []
+		#print(self.texts[start:end, 2])
+		#self.texts_train = list(self.texts[start:end, 2])
+		titles = list(self.texts[start:end, 1])
+		texts = list(self.texts[start:end, 2])
+		for i in range(0, len(texts)):
+			text = titles[i] + " " + texts[i]
+			self.texts_train.append(text)
+		labels = list(self.texts[start: end, 0])
+		for i in range(0, len(labels)):
+			if labels[i] == '1':
+				self.labels_train.append([1,0,0,0])
+			if labels[i] == '2':
+				self.labels_train.append([0,1,0,0])
+			if labels[i] == '3':
+				self.labels_train.append([0,0,1,0])
+			if labels[i] == '4':
+				self.labels_train.append([0,0,0,1])
 	def generate_batch(self):
 		start = self.start
 		end = self.end

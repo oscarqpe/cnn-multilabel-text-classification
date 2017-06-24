@@ -139,6 +139,14 @@ precision_sum:  0.864573413059741
 recall_sum:  0.864573413059741
 f_beta_sum:  0.864573413059741
 
+lsi mpl test 200000
+e 20000
+hammin_loss_sum:  0.7294270833333333
+subset_accuracy_sum:  0.7427951388888889
+accuracy_sum:  0.8583916667142764
+precision_sum:  0.8962551826549224
+recall_sum:  0.8962551826549224
+f_beta_sum:  0.8962551826549224
 
 AGNEWS
 BOW mlp
