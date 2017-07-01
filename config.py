@@ -2,7 +2,9 @@ global labels
 labels = []
 global label_size
 # AG NEWS
-label_size = 4
+#label_size = 4
+# dbpedia
+label_size = 14
 global max_characters
 max_characters = 1014#1932
 global batch_size

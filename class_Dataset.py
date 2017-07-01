@@ -4,310 +4,16 @@ import os
 import utils
 import config
 import random
+import csv
+import pandas as pd
 
 class Dataset:
-	def __init__(self, path_data = "", batch = 25):
-		#assert os.path.exists(path_data), 'No existe el archivo con los datos de entrada ' + path_data
-		self.path_data = path_data
-		self.names = []
-		self.names_test = []
-		self.texts_train = []
-		self.labels_train = []
+	def __init__(self, path_data = "", batch = 128):
 		self.batch = batch
-		self.total_texts = 12288#12337
-		#self.total_texts = 7168#7270 # first 3
-		self.total_test = 4864#4891
+		self.total_texts = 0
+		self.total_test = 0
 		self.start = 0
 		self.end = 0
-		self.start_test = 0
-		self.end_test = 0
-		self.first0 = 0
-		self.first1 = 0
-		self.first2 = 0
-		self.first3 = 0
-		self.first4 = 0
-		self.first5 = 0
-		self.first6 = 0
-		self.first7 = 0
-		self.first8 = 0
-		self.first9 = 0
-		for i in range(0, 12337):
-			self.names.append("text_" + str(i) + ".xml")
-		for i in range(0, self.total_test):
-			self.names_test.append("text_" + str(i) + ".xml")
-	def read_data(self, name, type = 1):
-		#print "extract: " + self.path_data + name
-		ruta = ""
-		if type == 1:
-			ruta = self.path_data + "train/" + name
-		elif type == 2:
-			ruta = self.path_data + "test/" + name
-		elif type == 3:
-			ruta = self.path_data + "first3/" + name
-		reuters = et.parse(ruta, et.XMLParser(encoding='ISO-8859-1')).getroot()
-		extract_labels = False
-		#print reuters
-		#for reuters in xml.findall('REUTERS'):
-		#	print reuters
-		matrix = []
-		for text in reuters.findall("TEXT"):
-			body = utils.extract_body(text)
-			if body != "" and body != None:
-				extract_labels = True
-				temp_text = body.text.replace(" ", "")
-				body = list(temp_text)
-			#if extract_labels == True:
-				labels_temp = np.zeros(config.label_size)
-				all_labels = 0
-				for a_topic in reuters.findall("TOPICS"):
-					for a_d in a_topic.findall("D"):
-						try:
-							label_index = utils.find_label_index(a_d.text)
-							labels_temp[label_index] = 1.0
-							all_labels += 1
-						except ValueError:
-							extract_labels = True
-				for a_topic in reuters.findall("PLACES"):
-					for a_d in a_topic.findall("D"):
-						try:
-							label_index = utils.find_label_index(a_d.text)
-							labels_temp[label_index] = 1.0
-							all_labels += 1
-						except ValueError:
-							extract_labels = True
-				for a_topic in reuters.findall("PEOPLE"):
-					for a_d in a_topic.findall("D"):
-						try:
-							label_index = utils.find_label_index(a_d.text)
-							labels_temp[label_index] = 1.0
-							all_labels += 1
-						except ValueError:
-							extract_labels = True
-				for a_topic in reuters.findall("ORGS"):
-					for a_d in a_topic.findall("D"):
-						try:
-							label_index = utils.find_label_index(a_d.text)
-							labels_temp[label_index] = 1.0
-							all_labels += 1
-						except ValueError:
-							extract_labels = True
-				for a_topic in reuters.findall("EXCHANGES"):
-					for a_d in a_topic.findall("D"):
-						try:
-							label_index = utils.find_label_index(a_d.text)
-							labels_temp[label_index] = 1.0
-							all_labels += 1
-						except ValueError:
-							extract_labels = True
-				if all_labels != 0:
-					self.labels_train = np.append(self.labels_train, labels_temp)
-					matrix = utils.one_hot_encoder(body)
-					#print matrix[1]
-					self.texts_train = np.append(self.texts_train, matrix)
-					#self.texts_train.append(matrix)
-					#print len(self.texts_train)
-					extract_labels = False
-				else:
-					extract_labels = False
-		#self.texts_train = np.concatenate([block for block in self.texts_train], 0)
-		#print self.texts_train.shape
-		#np.reshape(self.texts_train, (self.batch, config.vocabulary_size * config.max_characters))
-
-	def split_data(self, count_train, count_test):
-		print (self.path_data)
-		xml = et.parse(self.path_data, et.XMLParser(encoding='ISO-8859-1')).getroot()
-		extract_labels = False
-		ruta_train = "/home/oscarqpe/proyectos/qt/vigilancia-tecnologica/clasificador-multietiqueta/python/data/reuters/first9"
-		ruta_test = "/home/oscarqpe/proyectos/qt/vigilancia-tecnologica/clasificador-multietiqueta/python/data/reuters/test"
-		count_train = count_train
-		count_test = count_test
-		for reuters in xml.findall('REUTERS'):
-			matrix = []
-
-			for text in reuters.findall("TEXT"):
-				body = utils.extract_body(text)
-				if body != "" and body != None:
-					extract_labels = True
-					body = list(body.text)
-				#if extract_labels == True:
-					labels_temp = np.zeros(config.label_size)
-					all_labels = 0
-					for a_topic in reuters.findall("TOPICS"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("PLACES"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("PEOPLE"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("ORGS"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("EXCHANGES"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-							except ValueError:
-								extract_labels = True
-					
-					if all_labels != 0:
-						if reuters.get("LEWISSPLIT") == "TRAIN":
-							if all_labels > 1 and all_labels <= 9:
-								target = open(ruta_train + "/text_" + str(self.first9) + ".xml", 'w')
-								count_train += 1
-								target.truncate()
-								content = et.tostring(reuters, encoding='ISO-8859-1', method='xml')
-								target.write(content)
-								target.write("\n")
-								target.close()
-
-								self.labels_train.append(labels_temp)
-								matrix = utils.one_hot_encoder(body)
-								self.texts_train.append(matrix)
-								
-						'''
-						if reuters.get("LEWISSPLIT") == "TEST":
-							target = open(ruta_test + "/text_" + str(count_test) + ".xml", 'w')
-							count_test += 1
-							target.truncate()
-							content = et.tostring(reuters, encoding='ISO-8859-1', method='xml')
-							target.write(content)
-							target.write("\n")
-							#print "And finally, we close it."
-							target.close()
-
-							config.labels_test.append(labels_temp)
-							matrix = utils.one_hot_encoder(body)
-							config.texts_test.append(matrix)
-						'''
-						extract_labels = False
-					else:
-						extract_labels = False
-					if all_labels != 0:
-						if reuters.get("LEWISSPLIT") == "TRAIN":
-							if all_labels > 1 and all_labels <= 3:
-								self.first3 += 1
-							if all_labels > 1 and all_labels <= 4:
-								self.first4 += 1
-							if all_labels > 1 and all_labels <= 5:
-								self.first5 += 1
-							if all_labels > 1 and all_labels <= 6:
-								self.first6 += 1
-							if all_labels > 1 and all_labels <= 7:
-								self.first7 += 1
-							if all_labels > 1 and all_labels <= 8:
-								self.first8 += 1
-							if all_labels > 1 and all_labels <= 9:
-								self.first9 += 1
-	def extract_label_vector (self, ruta):
-		print (self.path_data)
-		extract_labels = False
-		real_labels = []
-		for i in range(0, 128):#7168):
-			reuters = et.parse(ruta + "/text_" + str(i) + ".xml", et.XMLParser(encoding='ISO-8859-1')).getroot()
-			for text in reuters.findall("TEXT"):
-				body = utils.extract_body(text)
-				if body != "" and body != None:
-					extract_labels = True
-					body = list(body.text)
-				#if extract_labels == True:
-					labels_temp = np.zeros(config.label_size)
-					all_labels = 0
-					for a_topic in reuters.findall("TOPICS"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-								try:
-									index = real_labels.index(config.labels[label_index])
-								except:
-									print("Labels first3: ", len(real_labels))
-									real_labels.append(config.labels[label_index])
-									extract_labels = True
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("PLACES"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-								try:
-									index = real_labels.index(config.labels[label_index])
-								except:
-									print("Labels first3: ", len(real_labels))
-									real_labels.append(config.labels[label_index])
-									extract_labels = True
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("PEOPLE"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-								try:
-									index = real_labels.index(config.labels[label_index])
-								except:
-									print("Labels first3: ", len(real_labels))
-									real_labels.append(config.labels[label_index])
-									extract_labels = True
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("ORGS"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-								try:
-									index = real_labels.index(config.labels[label_index])
-								except:
-									print("Labels first3: ", len(real_labels))
-									real_labels.append(config.labels[label_index])
-									extract_labels = True
-							except ValueError:
-								extract_labels = True
-					for a_topic in reuters.findall("EXCHANGES"):
-						for a_d in a_topic.findall("D"):
-							try:
-								label_index = utils.find_label_index(a_d.text)
-								labels_temp[label_index] = 1.0
-								all_labels += 1
-								try:
-									index = real_labels.index(config.labels[label_index])
-								except:
-									print("Labels first3: ", len(real_labels))
-									real_labels.append(config.labels[label_index])
-									extract_labels = True
-							except ValueError:
-								extract_labels = True
-		print("Labels first3->: ", len(real_labels))
-		print(real_labels)
 	def next_batch(self):
 		if self.end == 0:
 			self.start = 0
@@ -329,36 +35,123 @@ class Dataset:
 		else:
 			self.end = self.start
 			self.start = self.start - self.batch
-
-	def generate_batch(self, type):
+	def generate_batch(self):
 		start = self.start
 		end = self.end
 		self.texts_train = np.array([])
 		self.labels_train = np.array([])
-		for i in range(start, end):
-			self.read_data(self.names[i], type)
+		data_split = self.ids[start:end]
+		#print("Batch: ", len(data_split))
+		for i in range(0, len(data_split)):
+			index = int(data_split[i])
+			text = self.texts[index]
+			labels = self.labels[index][0]
+			split_labels = labels.split(" ")
+			labels_temp = np.zeros(config.label_size)
+			for j in range(1, len(split_labels)):
+				try:
+					label_index = utils.find_label_index(split_labels[j])
+					labels_temp[label_index] = 1.0
+				except ValueError:
+					print("Not have label: ", split_labels[j])
+			self.labels_train = np.append(self.labels_train, labels_temp)
+			self.texts_train = np.append(self.texts_train, text)
+	def read_ids_labels(self):
+		with open('data/rcv1-2/train0/ids_index_test0.txt', 'r') as f:
+			reader = csv.reader(f)
+			self.ids = np.array(list(reader))
+		self.data = np.array([])
+		with open('data/rcv1-2/train0/labels_test0.txt', 'r') as f:
+			reader = csv.reader(f)
+			self.labels = list(reader)
+			self.labels = np.array(self.labels)
+	def load_data_train(self):
+		with open('data/rcv1-2/train1014/train.csv', 'r') as f:
+			self.texts = f.readlines()
+		self.ids = np.arange(len(self.texts))
+		self.total_texts = int(len(self.texts) / self.batch) * self.batch
+		with open('data/rcv1-2/train1014/labels_train.csv', 'r') as f:
+			reader = csv.reader(f)
+			self.labels = np.array(list(reader))
 
-	def generate_batch_test(self):
-		start = self.start_test
-		end = self.end_test
-		self.texts_train = np.array([])
-		self.labels_train = np.array([])
-		for i in range(start, end):
-			self.read_data(self.names_test[i], 2)
+	def load_data_test(self):
+		with open('data/rcv1-2/train1014/test.csv', 'r') as f:
+			self.texts = f.readlines()
+		self.ids = np.arange(len(self.texts))
+		self.total_texts = int(len(self.texts) / self.batch) * self.batch
+		with open('data/rcv1-2/train1014/labels_test.csv', 'r') as f:
+			reader = csv.reader(f)
+			self.labels = np.array(list(reader))
+	def distribution_num_labels(self):
+		distribution = np.zeros((20,), dtype=np.int)
+		print(distribution)
+		for label in self.labels:
+			l = label[0].split(" ")
+			distribution[len(l) - 1] += 1
+		print(distribution)
 
-	def next_test(self):
-		if self.end_test == 0:
-			self.start_test = 0
-			self.end_test = self.batch
-		elif self.end_test + self.batch >= self.total_test:
-			self.start_test = self.end_test
-			self.end_test = self.total_test
-		else:
-			self.start_test = self.end_test
-			self.end_test = self.end_test + self.batch
-
+	def distribution_train_labels(self):
+		distribution = np.zeros((103,), dtype=np.int)
+		i = 0
+		for label in self.labels:
+			l = label[0].split(" ")
+			for j in range(1, len(l)):
+				try:
+					label_index = utils.find_label_index(l[j])
+					distribution[label_index] += 1
+				except ValueError:
+					print("Not have label: ", l[j])
+		for i in range(len(distribution)):
+			print(distribution[i], end = ", ")
+	def distribution_characters(self):
+		i = 0
+		j = 0
+		#distribution = np.zeros((40000,), dtype=np.int)
+		media = 0
+		self.texts_temp = []
+		self.labels_temp = []
+		for text in self.texts:
+			text = text.replace("\n"," ")
+			#distribution[len(list(text)) - 1] += 1
+			media += len(text)
+			if len(text) <= 1014:
+				print(i, self.ids[j], self.labels[j], len(text))
+				self.texts_temp.append(text)
+				self.labels_temp.append(self.labels[i][0])
+				i += 1
+			j += 1
+		print(media / len(self.texts))
+		#self.save_text()
+	def save_text(self):
+		target = open("data/rcv1-2/train1014/train1.csv", 'w')
+		target2 = open("data/rcv1-2/train1014/labels_train1.csv", 'w')
+		#target.truncate()
+		for i in range(len(self.texts_temp)):
+			line = self.texts_temp[i]
+			target.write(line)
+			target.write("\n")
+			line = self.labels_temp[i]
+			target2.write(line)
+			target2.write("\n")
+		target.close()
+		target2.close()
+		
+	def distribution_words (self):
+		i = 0
+		j = 0
+		#distribution = np.zeros((40000,), dtype=np.int)
+		media = 0
+		for text in self.texts:
+			text = text.split(" ")
+			#distribution[len(list(text)) - 1] += 1
+			media += len(text)
+			if len(text) < 1014:
+				print(i, self.ids[j], len(text))
+				i += 1
+			j += 1
+		print(media / len(self.texts))
 	def shuffler(self):
 		print ("shuffling data")
-		random.shuffle(self.names)
+		np.random.shuffle(self.ids)
 		self.end = 0
 		self.start = 0

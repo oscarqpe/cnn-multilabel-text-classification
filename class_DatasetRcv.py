@@ -5,6 +5,7 @@ import utils
 import config
 import random
 import csv
+import pandas as pd
 
 class Dataset:
 	def __init__(self, path_data = "", batch = 25):
@@ -153,19 +154,15 @@ class Dataset:
 			ids_index = data_split[i][0].split(" ")
 			id = int(ids_index[0])
 			index = int(ids_index[1])
-			lines = ""
-			with open('data/rcv1-2/train-vectors/'+str(index) +'_vector.txt', 'r') as f:
-				lines = f.readlines()
-			text = lines[0]
+			text = self.texts[index]
+
 			labels = self.labels[index][0]
 			split_text = text.split(" ")
 			split_labels = labels.split(" ")
 			vector = np.zeros(self.vocabulary_size)
 			labels_temp = np.zeros(config.label_size)
 			for j in range(1, len(split_text)):
-				#print(split_text[j])
 				valores = split_text[j].split(":")
-				#print(id, ": ", valores[0])
 				vector[int(valores[0]) - 1] = float(valores[1])
 			for j in range(1, len(split_labels)):
 				try:
@@ -409,7 +406,9 @@ class Dataset:
 			reader = csv.reader(f)
 			self.labels = list(reader)
 			self.labels = np.array(self.labels)
-
+	def all_data(self):
+		with open('data/rcv1-2/train0/train.csv', 'r') as f:
+			self.texts = f.readlines()
 	def read_labels_test(self, test):
 		self.total_texts = 23040#19968#20000
 		#with open('data/rcv1-2/ids_index_test0_' + str(test) + '.txt', 'r') as f:
@@ -452,25 +451,44 @@ class Dataset:
 				flag = id_
 		target.close()
 	def read_text(self, init, end):
-		with open('data/rcv1-2/ids_index_test0.txt', 'r') as f:
+		with open('data/rcv1-2/ids_test1.txt', 'r') as f:
 			reader = csv.reader(f)
 			self.ids = np.array(list(reader))
 		self.texts = []
 		for i in range(init, end):
-			ids_index = self.ids[i][0].split(" ")
-			id = int(ids_index[0])
+			#ids_index = self.ids[i][0].split(" ")
+			id = self.ids[i][0]
 			text_name = str(id) + "newsML.xml"
-			reuters = et.parse("data/rcv1-2/test-text0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
-			temp_text = ""
-			for text in reuters.findall("title"):
-				#print(text.text)
-				temp_text = temp_text + text.text#.replace(" ", "")
-			for text in reuters.findall("text"):
-				for p in text.findall("p"):
-					temp_text = temp_text + p.text#.replace(" ", "").replace("\t","")
+			if os.path.isfile("data/rcv1-2/test1/" + text_name):
+				reuters = et.parse("data/rcv1-2/test1/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+				temp_text = ""
+				for text in reuters.findall("title"):
+					#print(text.text)
+					temp_text = temp_text + text.text#.replace(" ", "")
+				for text in reuters.findall("text"):
+					for p in text.findall("p"):
+						temp_text = temp_text + p.text#.replace(" ", "").replace("\t","")
+				self.texts.append(temp_text)
+			else:
+				print("Not Found, ", str(id))
 			#print("ID TExt: ", id)
 			#print(temp_text)
-			self.texts.append(temp_text)
+			#self.texts.append(temp_text)
+	def write_cvs(self):
+		
+		target = open("data/rcv1-2/train1/train.csv", 'w')
+		target.truncate()
+		for i in range(len(self.texts)):
+			line = self.texts[i]
+			target.write(line)
+			target.write("\n")
+		target.close()
+		
+		'''
+		my_df = pd.DataFrame(self.texts)
+
+		my_df.to_csv('data/rcv1-2/train0/train.csv', index=False, header=False)
+		'''
 	def read_text_stemming(self, init, end):
 		self.temp_stemming = ""
 		with open('data/rcv1-2/lyrl2004_tokens_train.dat', 'r') as f:
@@ -534,13 +552,37 @@ class Dataset:
 			print(distribution[i], end = ", ")
 	def distribution_characters(self):
 		i = 0
-		distribution = np.zeros((40000,), dtype=np.int)
+		j = 0
+		#distribution = np.zeros((40000,), dtype=np.int)
+		media = 0
 		for text in self.texts:
 			text = text.replace(" ", "").replace("\n","")
-			distribution[len(list(text)) - 1] += 1
+			#distribution[len(list(text)) - 1] += 1
+			media += len(text)
+			if len(text) > 10000:
+				print(i, self.ids[j], len(text))
+				i += 1
+			j += 1
+		print(media / len(self.texts))
+		'''
 		for i in range(len(distribution)):
 			print(i, distribution[i], end = ", ")
 			i += 1
+		'''
+	def distribution_words (self):
+		i = 0
+		j = 0
+		#distribution = np.zeros((40000,), dtype=np.int)
+		media = 0
+		for text in self.texts:
+			text = text.split(" ")
+			#distribution[len(list(text)) - 1] += 1
+			media += len(text)
+			if len(text) > 10000:
+				print(i, self.ids[j], len(text))
+				i += 1
+			j += 1
+		print(media / len(self.texts))
 	def shuffler(self):
 		print ("shuffling data")
 		np.random.shuffle(self.ids)

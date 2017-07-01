@@ -5,7 +5,7 @@ import config
 import random
 import csv
 import utils
-
+import pandas as pd
 class Dataset:
 	def __init__(self, path_data = "", batch = 25):
 		#assert os.path.exists(path_data), 'No existe el archivo con los datos de entrada ' + path_data
@@ -17,8 +17,7 @@ class Dataset:
 		self.batch = batch
 		self.texts = []
 		#self.total_texts = 12288#12337
-		self.total_texts = 119936#7270 # first 3
-		self.total_test = 4864#4891
+		self.total_texts = 0#119936#7270 # first 3
 		self.start = 0
 		self.end = 0
 		self.start_test = 0
@@ -142,28 +141,59 @@ class Dataset:
 			if len(self.texts[i][2]) > 500:
 				aux += 1
 				print(aux)
-	def all_data(self):
-		with open('data/ag_news/train.csv', 'r') as f:
-			reader = csv.reader(f)
-			self.texts = list(reader)
-			self.texts = np.array(self.texts)
-	def all_data_vectorizer(self):
-		with open('data/ag_news/train.csv', 'r') as f:
-			reader = csv.reader(f)
-			self.texts = list(reader)
-			self.texts = np.array(self.texts)
-		titles = list(self.texts[0:120000, 1])
-		texts = list(self.texts[0:120000, 2])
-		self.texts = []
-		for i in range(0, len(texts)):
-			text = titles[i] + " " + texts[i]
-			self.texts.append(text)
-	def all_data_test(self):
-		self.total_texts = 7552
-		with open('data/ag_news/test.csv', 'r') as f:
-			reader = csv.reader(f)
-			self.texts = list(reader)
-			self.texts = np.array(self.texts)
+	def all_data(self, data):
+		if data == 0:
+			self.total_texts = 120000
+			with open('data/ag_news/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+		elif data == 1:
+			self.total_texts = 560000
+			with open('data/dbpedia/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+	def all_data_vectorizer(self, data):
+		if data == 0:
+			with open('data/ag_news/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+			titles = list(self.texts[0:120000, 1])
+			texts = list(self.texts[0:120000, 2])
+			self.texts = []
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+		elif data == 1:
+			'''
+			with open('data/dbpedia/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+			'''
+			df = pd.read_csv('data/dbpedia/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:560000, 1])
+			texts = list(df.ix[0:560000, 2])
+			self.texts = []
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+	def all_data_test(self, data):
+		if data == 0:
+			self.total_texts = 7552
+			with open('data/ag_news/test.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+		elif data == 1:
+			self.total_texts = 70000
+			with open('data/dbpedia/test.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
 	def distribution_train_labels(self):
 		distribution = np.zeros((config.label_size,), dtype=np.int)
 		distribution_l = np.zeros((20,), dtype=np.int)
