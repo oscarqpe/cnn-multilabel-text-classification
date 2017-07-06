@@ -5,7 +5,38 @@ from PIL import Image
 from scipy.stats import rankdata
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-
+def one_hot(array_texts):
+	quantization = []
+	for i in range(len(array_texts)):
+		matrix_one_hot = np.array([np.zeros(config.vocabulary_size, dtype=np.float64)])
+		text = array_texts[i]
+		if len(text) > config.max_characters:
+			for count_character, character in enumerate(text):
+				if count_character == config.max_characters:
+					break
+				try:
+					index_character = config.vocabulary.index(character.lower())
+					array_encoded = np.zeros(config.vocabulary_size)
+					array_encoded[index_character] = 1.0
+					matrix_one_hot = np.append(matrix_one_hot, [array_encoded], axis = 0)
+				except ValueError:
+					matrix_one_hot = np.append(matrix_one_hot, [np.zeros(config.vocabulary_size)], axis = 0)
+		else:
+			limit_character = 0
+			for count_character, character in enumerate(text):
+				limit_character = count_character
+				try:
+					index_character = config.vocabulary.index(character.lower())
+					array_encoded = np.zeros(config.vocabulary_size)
+					array_encoded[index_character] = 1.0
+					matrix_one_hot = np.append(matrix_one_hot, [array_encoded], axis = 0)
+				except ValueError:
+					matrix_one_hot = np.append(matrix_one_hot, [np.zeros(config.vocabulary_size)], axis = 0)
+			for count_character in range(limit_character + 1, config.max_characters):
+				matrix_one_hot = np.append(matrix_one_hot, [np.zeros(config.vocabulary_size)], axis = 0)
+		matrix_one_hot = np.delete(matrix_one_hot, 0, 0)
+		quantization.append(matrix_one_hot)
+	return quantization#.transpose()
 def one_hot_encoder (text):
 	matrix_one_hot = np.array([np.zeros(config.vocabulary_size, dtype=np.float64)])
 	if len(text) > config.max_characters:
@@ -269,7 +300,7 @@ def get_accuracy_test (logits, labels):
 		
 		if len(max_h) == 0:
 			max_h = max_x
-		max_h = max_x ## for multi class
+		#max_h = max_x ## for multi class
 		max_x = np.array(max_x)
 		ranking_y_predicted = rankdata(max_x_val)
 		#print("(X, Y): ", max_h, max_y, max_x, max_x_val)

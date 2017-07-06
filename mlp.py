@@ -5,7 +5,7 @@ import config
 class Mlp:
 	def __init__ (self) :
 		# Parameters
-		self.learning_rate = 0.001
+		self.learning_rate = 0.0005
 		#self.global_step = tf.Variable(0, trainable=False)
 		#self.starter_learning_rate = 0.001
 		# Network Parameters

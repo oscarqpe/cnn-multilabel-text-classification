@@ -7,8 +7,8 @@ import pickle
 import config
 import utils
 utils.read_labels("rcv")
-import class_DatasetRcv as ds
-import cnn as cn
+import class_Dataset as ds
+import mlp as cn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
@@ -28,7 +28,7 @@ if env == "local":
 elif env == "server":
     path = "data/reuters/"
 
-cnn = cn.Cnn()
+cnn = cn.Mlp()
 # Construct model
 pred = cnn.network(cnn.x, cnn.weights, cnn.biases, cnn.dropout)
 
@@ -39,14 +39,17 @@ cost = -tf.reduce_sum(((cnn.y * tf.log(pred + 1e-9)) + ((1-cnn.y) * tf.log(1 - p
 optimizer = tf.train.AdamOptimizer(learning_rate=cnn.learning_rate).minimize(cost)
 #optimizer = tf.train.AdagradOptimizer(learning_rate=cnn.learning_rate).minimize(cost)
 # Evaluate model
-correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
+#correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(cnn.y, 1))
 #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
-data.read_labels() # bibtex, RCV
-#data.all_data(1) # AgNews
+data.load_data_train()
+#data.read_labels() # bibtex, RCV
+#data.all_data() # AgNews
 #data.all_data_vectorizer(1) # AgNews
-#data.read_text(0, 23040)
+#data.read_text(0, 199328)
+#data.write_cvs()
+
 stop_words = get_stop_words('en')
 vectorizer = TfidfVectorizer(stop_words=stop_words, 
                              use_idf=True, 
@@ -59,11 +62,10 @@ svd_transformer = Pipeline([('tfidf', vectorizer),
                             ('svd', svd_model)])
 
 #texts_train = list(data.texts)
-#svd_transformer.fit_transform(data.texts)
+svd_transformer.fit_transform(data.texts)
 
-#pickle.dump(svd_transformer, open("data/dbpedia/vectorizer/vectorizer_lsi.pickle", "wb"))
-#svd_transformer = pickle.load(open("data/ag_news/vectorizer/vectorizer_lsi2.pickle", "rb"))
-svd_transformer = pickle.load(open("data/rcv1-2/vectorizer/vectorizer_lsi2.pickle", "rb"))
+#pickle.dump(svd_transformer, open("data/rcv1-2/train1014/vectorizer/vectorizer_lsi.pickle", "wb"), protocol=4)
+svd_transformer = pickle.load(open("data/rcv1-2/train1014/vectorizer/vectorizer_lsi.pickle", "rb"))
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
@@ -76,17 +78,17 @@ with tf.Session() as sess:
     #print(sess.run("{:.5f}".format(cnn.weights['wc1'])))
     t = time.asctime()
     print (t)
-    print("TRAINING")
     step = 1
     # Keep training until reach max iterations
     epoch = 1
-    model_saving = 5
+    model_saving = 1
     print("Epoch: " + str(epoch))
-    saver.restore(sess, "cnn_weights/model_cnn_4_lsi2.ckpt")
+    #saver.restore(sess, "mlp_weights/model1014_mlp_1_lsi.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
-    config.training_iters = 1280000 # 5000 * 128
+    config.training_iters = 2560000 # 5000 * 128
+    #data.load_data_train()
     data.shuffler()
     print("TOTAL Training: ", data.total_texts)
     train = True
@@ -138,8 +140,7 @@ with tf.Session() as sess:
         print ("TESTING")
         data = None
         data = ds.Dataset(path, config.batch_size)
-        data.read_labels_test(0) # bibtext, RCV
-        #data.all_data_test() # AgNEWS
+        data.load_data_test()
         step = 1
         total_test = data.total_texts
         print (total_test)

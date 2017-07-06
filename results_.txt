@@ -153,7 +153,7 @@ precision_sum:  0.864573413059741
 recall_sum:  0.864573413059741
 f_beta_sum:  0.864573413059741
 
-lsi mpl test 200000
+lsi2 mpl test 200000
 e 20000
 hammin_loss_sum:  0.7294270833333333
 subset_accuracy_sum:  0.7427951388888889
@@ -162,21 +162,21 @@ precision_sum:  0.8962551826549224
 recall_sum:  0.8962551826549224
 f_beta_sum:  0.8962551826549224
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+lsi3 mlp test 200000
+e 10000
+hammin_loss_sum:  0.7502604166666667
+subset_accuracy_sum:  0.7349392361111111
+accuracy_sum:  0.8537056881197502
+precision_sum:  0.8926875854903201
+recall_sum:  0.8926875854903201
+f_beta_sum:  0.8926875854903201
+e 20000
+hammin_loss_sum:  0.7313368055555556
+subset_accuracy_sum:  0.7417534722222222
+accuracy_sum:  0.8582845834040684
+precision_sum:  0.8961612012360709
+recall_sum:  0.8961612012360709
+f_beta_sum:  0.8961612012360709
 
 AGNEWS
 BOW mlp

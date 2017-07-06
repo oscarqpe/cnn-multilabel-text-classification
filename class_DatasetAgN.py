@@ -6,7 +6,6 @@ import random
 import csv
 import utils
 import pandas as pd
-
 class Dataset:
 	def __init__(self, path_data = "", batch = 25):
 		#assert os.path.exists(path_data), 'No existe el archivo con los datos de entrada ' + path_data
@@ -18,8 +17,7 @@ class Dataset:
 		self.batch = batch
 		self.texts = []
 		#self.total_texts = 12288#12337
-		self.total_texts = 119936#7270 # first 3
-		self.total_test = 4864#4891
+		self.total_texts = 0#119936#7270 # first 3
 		self.start = 0
 		self.end = 0
 		self.start_test = 0
@@ -143,13 +141,10 @@ class Dataset:
 				self.texts = np.array(self.texts)
 		elif data == 1:
 			self.total_texts = 560000
-			'''
 			with open('data/dbpedia/train.csv', 'r') as f:
 				reader = csv.reader(f)
 				self.texts = list(reader)
 				self.texts = np.array(self.texts)
-			'''
-			self.texts = pd.read_csv('data/dbpedia/train.csv', header=None).as_matrix()
 	def all_data_vectorizer(self, data):
 		if data == 0:
 			with open('data/ag_news/train.csv', 'r') as f:
@@ -177,10 +172,10 @@ class Dataset:
 			for i in range(0, len(texts)):
 				text = titles[i] + " " + texts[i]
 				self.texts.append(text)
-		
+
 	def all_data_test(self, data):
 		if data == 0:
-			self.total_texts = 7600
+			self.total_texts = 7552
 			with open('data/ag_news/test.csv', 'r') as f:
 				reader = csv.reader(f)
 				self.texts = list(reader)
