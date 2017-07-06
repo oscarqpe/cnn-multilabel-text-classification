@@ -37,10 +37,10 @@ class Mlp:
 		# Reshape conv2 output to fit fully connected layer input
 		#print(weights['wd1'])
 		fc1 = tf.reshape(x, [-1, weights['wd1'].get_shape().as_list()[0]])
-		print(fc1)
+		print(fc1.shape)
 		fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
 		fc1 = tf.nn.relu(fc1)
-		#print(fc1)
+		print(fc1.shape)
 		fc1 = tf.nn.dropout(fc1, dropout)
 		#print(fc1)
 		#fc2 = tf.reshape(fc1, [-1, weights['wd2'].get_shape().as_list()[0]])

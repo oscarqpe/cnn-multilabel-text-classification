@@ -83,7 +83,7 @@ class Dataset:
 		data_split = self.ids[start:end]
 		for i in range(0, len(data_split)):
 			#print(data_split[i])
-			ids_index = data_split[i].split(" ")
+			ids_index = data_split[i][0].split(" ")
 			id = int(ids_index[0])
 			index = int(ids_index[1])
 			labels = self.labels[index][0]
@@ -97,7 +97,8 @@ class Dataset:
 					print("Not have label: ", split_labels[j])
 			self.labels_train.append(labels_temp)
 			text_name = str(id) + "newsML.xml"
-			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			#reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			reuters = et.parse("data/rcv1-2/test-text0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
 			temp_text = ""
 			for text in reuters.findall("title"):
 				#print(text.text)
@@ -130,7 +131,8 @@ class Dataset:
 					print("Not have label: ", split_labels[j])
 			self.labels_train.append(labels_temp)
 			text_name = str(id) + "newsML.xml"
-			reuters = et.parse("data/rcv1-2/test-text0-0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			#reuters = et.parse("data/rcv1-2/test-text0-0/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
+			reuters = et.parse("data/rcv1-2/train-text/" + text_name, et.XMLParser(encoding='ISO-8859-1')).getroot()
 			temp_text = ""
 			for text in reuters.findall("title"):
 				#print(text.text)

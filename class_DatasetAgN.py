@@ -5,6 +5,7 @@ import config
 import random
 import csv
 import utils
+import pandas as pd
 
 class Dataset:
 	def __init__(self, path_data = "", batch = 25):
@@ -86,14 +87,10 @@ class Dataset:
 			self.texts_train.append(text)
 		labels = list(self.texts[start: end, 0])
 		for i in range(0, len(labels)):
-			if labels[i] == '1':
-				self.labels_train.append([1,0,0,0])
-			if labels[i] == '2':
-				self.labels_train.append([0,1,0,0])
-			if labels[i] == '3':
-				self.labels_train.append([0,0,1,0])
-			if labels[i] == '4':
-				self.labels_train.append([0,0,0,1])
+			temp = np.zeros(config.label_size)
+			temp[int(labels[i]) - 1] = 1
+			self.labels_train.append(temp)
+			
 	def generate_batch_hot (self):
 		start = self.start
 		end = self.end
@@ -109,14 +106,9 @@ class Dataset:
 			self.texts_train.append(matrix)
 		labels = list(self.texts[start: end, 0])
 		for i in range(0, len(labels)):
-			if labels[i] == '1':
-				self.labels_train.append([1,0,0,0])
-			if labels[i] == '2':
-				self.labels_train.append([0,1,0,0])
-			if labels[i] == '3':
-				self.labels_train.append([0,0,1,0])
-			if labels[i] == '4':
-				self.labels_train.append([0,0,0,1])
+			temp = np.zeros(config.label_size)
+			temp[int(labels[i]) - 1] = 1
+			self.labels_train.append(temp)
 
 	def generate_batch_test(self):
 		start = self.start_test
@@ -142,28 +134,63 @@ class Dataset:
 			if len(self.texts[i][2]) > 500:
 				aux += 1
 				print(aux)
-	def all_data(self):
-		with open('data/ag_news/train.csv', 'r') as f:
-			reader = csv.reader(f)
-			self.texts = list(reader)
-			self.texts = np.array(self.texts)
-	def all_data_vectorizer(self):
-		with open('data/ag_news/train.csv', 'r') as f:
-			reader = csv.reader(f)
-			self.texts = list(reader)
-			self.texts = np.array(self.texts)
-		titles = list(self.texts[0:120000, 1])
-		texts = list(self.texts[0:120000, 2])
-		self.texts = []
-		for i in range(0, len(texts)):
-			text = titles[i] + " " + texts[i]
-			self.texts.append(text)
-	def all_data_test(self):
-		self.total_texts = 7552
-		with open('data/ag_news/test.csv', 'r') as f:
-			reader = csv.reader(f)
-			self.texts = list(reader)
-			self.texts = np.array(self.texts)
+	def all_data(self, data):
+		if data == 0:
+			self.total_texts = 120000
+			with open('data/ag_news/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+		elif data == 1:
+			self.total_texts = 560000
+			'''
+			with open('data/dbpedia/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+			'''
+			self.texts = pd.read_csv('data/dbpedia/train.csv', header=None).as_matrix()
+	def all_data_vectorizer(self, data):
+		if data == 0:
+			with open('data/ag_news/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+			titles = list(self.texts[0:120000, 1])
+			texts = list(self.texts[0:120000, 2])
+			self.texts = []
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+		elif data == 1:
+			'''
+			with open('data/dbpedia/train.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+			'''
+			df = pd.read_csv('data/dbpedia/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:560000, 1])
+			texts = list(df.ix[0:560000, 2])
+			self.texts = []
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+		
+	def all_data_test(self, data):
+		if data == 0:
+			self.total_texts = 7600
+			with open('data/ag_news/test.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
+		elif data == 1:
+			self.total_texts = 70000
+			with open('data/dbpedia/test.csv', 'r') as f:
+				reader = csv.reader(f)
+				self.texts = list(reader)
+				self.texts = np.array(self.texts)
 	def distribution_train_labels(self):
 		distribution = np.zeros((config.label_size,), dtype=np.int)
 		distribution_l = np.zeros((20,), dtype=np.int)

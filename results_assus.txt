@@ -38,6 +38,30 @@ precision_sum:  0.878177966101695
 recall_sum:  0.878177966101695
 f_beta_sum:  0.878177966101695
 
+CNN1 e 5000
+hammin_loss_sum:  0.2661546610169492
+subset_accuracy_sum:  0.8669226694915254
+accuracy_sum:  0.8669226694915254
+precision_sum:  0.8669226694915254
+recall_sum:  0.8669226694915254
+f_beta_sum:  0.8669226694915254
+
+cnn2 e 5000 dropout
+hammin_loss_sum:  0.4152542372881356
+subset_accuracy_sum:  0.7923728813559322
+accuracy_sum:  0.7923728813559322
+precision_sum:  0.7923728813559322
+recall_sum:  0.7923728813559322
+f_beta_sum:  0.7923728813559322
+
+cnn2 filtros 128 
+hammin_loss_sum:  0.24814618644067796
+subset_accuracy_sum:  0.875926906779661
+accuracy_sum:  0.875926906779661
+precision_sum:  0.875926906779661
+recall_sum:  0.875926906779661
+f_beta_sum:  0.875926906779661
+
 
 bow 5000
 
@@ -122,75 +146,85 @@ accuracy_sum:  0.7431534165120405
 precision_sum:  0.9046057223303317
 recall_sum:  0.7800133784095623
 f_beta_sum:  0.8101545594073463
+====
+RCV 
+lsi cnn1hidden 5000 threash
+hammin_loss_sum:  1.861378205128205
+subset_accuracy_sum:  0.37169471153846156
+accuracy_sum:  0.6176323342789691
+precision_sum:  0.8088461776938336
+recall_sum:  0.672128697068601
+f_beta_sum:  0.7004130071114494
 
-RCV
-lsi mlp 5000 threasholding
-hammin_loss_sum:  0.9704527243589743
-subset_accuracy_sum:  0.5287960737179487
-accuracy_sum:  0.7614812508705241
-precision_sum:  0.8953839635480266
-recall_sum:  0.809267345651811
-f_beta_sum:  0.8262166991140197
-lsi mlp 10000 threasholding
-hammin_loss_sum:  0.9693509615384616
-subset_accuracy_sum:  0.5306991185897436
-accuracy_sum:  0.7653337506177054
-precision_sum:  0.8916968845679787
-recall_sum:  0.8176828524484773
-f_beta_sum:  0.829761557681756
-lsi mlp 5000 
-hammin_loss_sum:  0.9589342948717948
-subset_accuracy_sum:  0.6803385416666666
-accuracy_sum:  0.8179025399556189
-precision_sum:  0.8648260546322445
-recall_sum:  0.8648260546322445
-f_beta_sum:  0.8648260546322445
-lsi mlp 10000
-hammin_loss_sum:  0.9630408653846154
-subset_accuracy_sum:  0.6792367788461539
-accuracy_sum:  0.8174211543818353
-precision_sum:  0.864573413059741
-recall_sum:  0.864573413059741
-f_beta_sum:  0.864573413059741
+lsi cnn2hidden 5000 threash
+hammin_loss_sum:  1.8194110576923077
+subset_accuracy_sum:  0.40409655448717946
+accuracy_sum:  0.6378125738777781
+precision_sum:  0.7948378318007224
+recall_sum:  0.6979468057705742
+f_beta_sum:  0.7152497678275765
 
-lsi mpl test 200000
+lsi cnn2hidden 5000
+hammin_loss_sum:  1.8193108974358974
+subset_accuracy_sum:  0.5082131410256411
+accuracy_sum:  0.670594700105691
+precision_sum:  0.7370614818819449
+recall_sum:  0.7370614818819449
+f_beta_sum:  0.7370614818819449
+
+lsi cnn2hidden 20000
+hammin_loss_sum:  1.85546875
+subset_accuracy_sum:  0.5127203525641025
+accuracy_sum:  0.669314065610361
+precision_sum:  0.7336811261766188
+recall_sum:  0.7336811261766188
+f_beta_sum:  0.7336811261766188
+
+lsi2 cnn 
 e 20000
-hammin_loss_sum:  0.7294270833333333
-subset_accuracy_sum:  0.7427951388888889
-accuracy_sum:  0.8583916667142764
-precision_sum:  0.8962551826549224
-recall_sum:  0.8962551826549224
-f_beta_sum:  0.8962551826549224
+hammin_loss_sum:  1.1135416666666667
+subset_accuracy_sum:  0.5396267361111111
+accuracy_sum:  0.7550438702163963
+precision_sum:  0.8780529626623377
+recall_sum:  0.8049294423024893
+f_beta_sum:  0.8174452894952963
+lsi2 cnn 
+e 30000
+hammin_loss_sum:  1.1109375
+subset_accuracy_sum:  0.6674913194444444
+accuracy_sum:  0.7977547645610227
+precision_sum:  0.8453678698568022
+recall_sum:  0.8453678698568022
+f_beta_sum:  0.8453678698568022
+lsi2 cnn 
+e 40000
+hammin_loss_sum:  1.07890625
+subset_accuracy_sum:  0.678515625
+accuracy_sum:  0.8045773759535931
+precision_sum:  0.8507171995876419
+recall_sum:  0.8507171995876419
+f_beta_sum:  0.8507171995876419
+e 50000
+hammin_loss_sum:  1.1044270833333334
+subset_accuracy_sum:  0.6730902777777777
+accuracy_sum:  0.800052771267347
+precision_sum:  0.8466788075446928
+recall_sum:  0.8466788075446928
+f_beta_sum:  0.8466788075446928
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-AGNEWS
-BOW mlp
-e 10000
-hammin_loss_sum:  0.1853813559322034
-subset_accuracy_sum:  0.9073093220338984
-accuracy_sum:  0.9073093220338984
-precision_sum:  0.9073093220338984
-recall_sum:  0.9073093220338984
-f_beta_sum:  0.9073093220338984
-e 5000
-hammin_loss_sum:  0.18379237288135594
-subset_accuracy_sum:  0.908103813559322
-accuracy_sum:  0.908103813559322
-precision_sum:  0.908103813559322
-recall_sum:  0.908103813559322
-f_beta_sum:  0.908103813559322
+cnn 1024 test 200000
+e 20000
+hammin_loss_sum:  0.9991319444444444
+subset_accuracy_sum:  0.5677517361111111
+accuracy_sum:  0.7802217816784877
+precision_sum:  0.8897835957927108
+recall_sum:  0.828809876104798
+f_beta_sum:  0.8394771797975142
+cnn 1024 test 30000
+hammin_loss_sum:  0.9722222222222222
+subset_accuracy_sum:  0.5818142361111112
+accuracy_sum:  0.7905369888117281
+precision_sum:  0.8815807739473103
+recall_sum:  0.8480528546251207
+f_beta_sum:  0.8477250932217615

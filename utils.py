@@ -272,7 +272,7 @@ def get_accuracy_test (logits, labels):
 		max_h = max_x ## for multi class
 		max_x = np.array(max_x)
 		ranking_y_predicted = rankdata(max_x_val)
-		print("(X, Y): ", max_h, max_y, max_x, max_x_val)
+		#print("(X, Y): ", max_h, max_y, max_x, max_x_val)
 		### HAMMING LOSS ###
 		hammin_loss_sum += len(np.setdiff1d(max_x, max_y)) + len(np.setdiff1d(max_y, max_x))
 		### ONE ERROR ###

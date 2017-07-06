@@ -13,7 +13,7 @@ class Cnn:
 		self.n_input = config.vocabulary_size * config.max_characters # vocabulary * text character size (img shape: l * 924)
 		self.n_classes = config.label_size # reuters total classes
 		self.dropout = 0.5 # Dropout, probability to keep units
-		self.output_conv = 32
+		self.output_conv = 256
 		self.hidden_size = 2048
 		self.gaussian = 0.05
 		self.gaussian_h = 0.02
@@ -30,6 +30,7 @@ class Cnn:
 			#'wc3': tf.Variable(tf.random_normal([7, self.output_conv, self.output_conv], mean=0.0, stddev=self.gaussian), name="wc3"),
 			# fully connected, 7*7*64 inputs, 1024 outputs
 			'wd1': tf.Variable(tf.random_normal([110 * self.output_conv, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd3"),
+			#'wd2': tf.Variable(tf.random_normal([self.hidden_size, self.hidden_size], mean=0.0, stddev=self.gaussian_h), name="wd2"),
 			# 1024 inputs, 10 outputs (class prediction)
 			'out': tf.Variable(tf.random_normal([self.hidden_size, config.label_size], mean=0.0, stddev=self.gaussian_h), name="out")
 		}
@@ -68,11 +69,13 @@ class Cnn:
 		print(conv1.shape)
 		conv1 = self.max_pool_1d(conv1, config.max_characters - 7 + 1, self.output_conv, 3)
 		print(conv1.shape)
+		#conv1 = tf.nn.dropout(conv1, dropout)
 
 		conv2 = self.convolution_1d(conv1, weights['wc2'], biases['bc2'], strides=1)
 		print(conv2.shape)
 		conv2 = self.max_pool_1d(conv2, 336 - 7 + 1, self.output_conv, 3)
 		print(conv2.shape)
+		#conv2 = tf.nn.dropout(conv2, dropout)
 
 		fc1 = tf.reshape(conv2, [-1, weights['wd1'].get_shape().as_list()[0]])
 		print(fc1.shape)
