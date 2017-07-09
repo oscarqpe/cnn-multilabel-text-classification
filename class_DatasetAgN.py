@@ -6,6 +6,7 @@ import random
 import csv
 import utils
 import pandas as pd
+
 class Dataset:
 	def __init__(self, path_data = "", batch = 25):
 		#assert os.path.exists(path_data), 'No existe el archivo con los datos de entrada ' + path_data
@@ -76,17 +77,16 @@ class Dataset:
 		end = self.end
 		self.texts_train = []
 		self.labels_train = []
-		#print(self.texts[start:end, 2])
-		#self.texts_train = list(self.texts[start:end, 2])
-		titles = list(self.texts[start:end, 1])
-		texts = list(self.texts[start:end, 2])
-		for i in range(0, len(texts)):
-			text = titles[i] + " " + texts[i]
-			self.texts_train.append(text)
-		labels = list(self.texts[start: end, 0])
-		for i in range(0, len(labels)):
+		data_split = self.ids[start:end]
+		#print("Batch: ", len(data_split))
+		for i in range(0, len(data_split)):
+			index = int(data_split[i])
+			self.texts_train.append(self.texts[index])
+			labels = self.labels[index]
+			#for i in range(0, len(labels)):
+			#print("label: ", labels)
 			temp = np.zeros(config.label_size)
-			temp[int(labels[i]) - 1] = 1
+			temp[int(labels) - 1] = 1
 			self.labels_train.append(temp)
 			
 	def generate_batch_hot (self):
@@ -134,17 +134,76 @@ class Dataset:
 				print(aux)
 	def all_data(self, data):
 		if data == 0:
-			self.total_texts = 120000
-			with open('data/ag_news/train.csv', 'r') as f:
-				reader = csv.reader(f)
-				self.texts = list(reader)
-				self.texts = np.array(self.texts)
+			self.total_texts = 119936#120000
+			df = pd.read_csv('data/ag_news/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:120000, 1])
+			texts = list(df.ix[0:120000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:120000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
 		elif data == 1:
 			self.total_texts = 560000
-			with open('data/dbpedia/train.csv', 'r') as f:
-				reader = csv.reader(f)
-				self.texts = list(reader)
-				self.texts = np.array(self.texts)
+			df = pd.read_csv('data/dbpedia/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:560000, 1])
+			texts = list(df.ix[0:560000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:560000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 2:
+			self.total_texts = 649984#650000
+			df = pd.read_csv('data/yelp/train.csv', header=None)
+			print(np.shape(df))
+			texts = list(df.ix[0:650000, 1])
+			self.texts = []
+			self.labels = list(df.ix[0:650000, 0])
+			for i in range(0, len(texts)):
+				self.texts.append(texts[i])
+			self.ids = np.arange(len(self.texts))
+		elif data == 3:
+			self.total_texts = 1399936#1400000
+			df = pd.read_csv('data/yahoo/train.csv', header=None)
+			print(np.shape(df))
+			question = list(df.ix[0:1400000, 1])
+			content = list(df.ix[0:1400000, 2])
+			answer = list(df.ix[0:1400000, 3])
+			self.texts = []
+			self.labels = list(df.ix[0:1400000, 0])
+			for i in range(0, len(question)):
+				text = str(question[i]) + " " + str(content[i]) + " " + str(answer[i])
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 4:
+			self.total_texts = 449920#450000
+			df = pd.read_csv('data/sogou/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:450000, 1])
+			texts = list(df.ix[0:450000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:450000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 5:
+			self.total_texts = 2999936#3000000
+			df = pd.read_csv('data/amazon/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:3000000, 1])
+			texts = list(df.ix[0:3000000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:3000000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
 	def all_data_vectorizer(self, data):
 		if data == 0:
 			with open('data/ag_news/train.csv', 'r') as f:
@@ -157,13 +216,8 @@ class Dataset:
 			for i in range(0, len(texts)):
 				text = titles[i] + " " + texts[i]
 				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
 		elif data == 1:
-			'''
-			with open('data/dbpedia/train.csv', 'r') as f:
-				reader = csv.reader(f)
-				self.texts = list(reader)
-				self.texts = np.array(self.texts)
-			'''
 			df = pd.read_csv('data/dbpedia/train.csv', header=None)
 			print(np.shape(df))
 			titles = list(df.ix[0:560000, 1])
@@ -172,20 +226,118 @@ class Dataset:
 			for i in range(0, len(texts)):
 				text = titles[i] + " " + texts[i]
 				self.texts.append(text)
-
+			self.ids = np.arange(len(self.texts))
+		elif data == 2:
+			df = pd.read_csv('data/yelp/train.csv', header=None)
+			print(np.shape(df))
+			texts = list(df.ix[0:650000, 1])
+			self.texts = []
+			for i in range(0, len(texts)):
+				self.texts.append(texts[i])
+			self.ids = np.arange(len(self.texts))
+		elif data == 3:
+			df = pd.read_csv('data/yahoo/train.csv', header=None)
+			print(np.shape(df))
+			question = list(df.ix[0:1400000, 1])
+			content = list(df.ix[0:1400000, 2])
+			answer = list(df.ix[0:1400000, 3])
+			self.texts = []
+			for i in range(0, len(question)):
+				text = question[i] + " " + content[i] + " " + answer[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 4:
+			df = pd.read_csv('data/sogou/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:450000, 1])
+			texts = list(df.ix[0:450000, 2])
+			self.texts = []
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 5:
+			df = pd.read_csv('data/amazon/train.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:3000000, 1])
+			texts = list(df.ix[0:3000000, 2])
+			self.texts = []
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
 	def all_data_test(self, data):
 		if data == 0:
 			self.total_texts = 7552
-			with open('data/ag_news/test.csv', 'r') as f:
-				reader = csv.reader(f)
-				self.texts = list(reader)
-				self.texts = np.array(self.texts)
+			df = pd.read_csv('data/ag_news/test.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:7600, 1])
+			texts = list(df.ix[0:7600, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:7600, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
 		elif data == 1:
-			self.total_texts = 70000
-			with open('data/dbpedia/test.csv', 'r') as f:
-				reader = csv.reader(f)
-				self.texts = list(reader)
-				self.texts = np.array(self.texts)
+			self.total_texts = 69888#70000
+			df = pd.read_csv('data/dbpedia/test.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:70000, 1])
+			texts = list(df.ix[0:70000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:70000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 2:
+			self.total_texts = 49920#50000
+			df = pd.read_csv('data/yelp/test.csv', header=None)
+			print(np.shape(df))
+			texts = list(df.ix[0:50000, 1])
+			self.texts = []
+			self.labels = list(df.ix[0:50000, 0])
+			for i in range(0, len(texts)):
+				self.texts.append(texts[i])
+			self.ids = np.arange(len(self.texts))
+		elif data == 3:
+			self.total_texts = 59904#60000
+			df = pd.read_csv('data/yahoo/test.csv', header=None)
+			print(np.shape(df))
+			question = list(df.ix[0:60000, 1])
+			content = list(df.ix[0:60000, 2])
+			answer = list(df.ix[0:60000, 3])
+			self.texts = []
+			self.labels = list(df.ix[0:60000, 0])
+			for i in range(0, len(question)):
+				text = str(question[i]) + " " + str(content[i]) + " " + str(answer[i])
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 4:
+			self.total_texts = 59904#60000
+			df = pd.read_csv('data/sogou/test.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:60000, 1])
+			texts = list(df.ix[0:60000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:60000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
+		elif data == 5:
+			self.total_texts = 649984#650000
+			df = pd.read_csv('data/amazon/test.csv', header=None)
+			print(np.shape(df))
+			titles = list(df.ix[0:650000, 1])
+			texts = list(df.ix[0:650000, 2])
+			self.texts = []
+			self.labels = list(df.ix[0:650000, 0])
+			for i in range(0, len(texts)):
+				text = titles[i] + " " + texts[i]
+				self.texts.append(text)
+			self.ids = np.arange(len(self.texts))
 	def distribution_train_labels(self):
 		distribution = np.zeros((config.label_size,), dtype=np.int)
 		distribution_l = np.zeros((20,), dtype=np.int)
@@ -196,6 +348,6 @@ class Dataset:
 			print(distribution[i], end = ", ")
 	def shuffler(self):
 		print ("shuffling texts")
-		np.random.shuffle(self.texts)
+		np.random.shuffle(self.ids)
 		self.end = 0
 		self.start = 0

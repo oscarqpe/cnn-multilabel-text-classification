@@ -6,9 +6,9 @@ import sys
 import pickle
 import config
 import utils
-utils.read_labels("rcv")
-import class_Dataset as ds
-import mlp as cn
+utils.read_labels("yelp")
+import class_DatasetAgN as ds
+import cnn as cn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
@@ -28,14 +28,14 @@ if env == "local":
 elif env == "server":
     path = "data/reuters/"
 
-cnn = cn.Mlp()
+cnn = cn.Cnn()
 # Construct model
 pred = cnn.network(cnn.x, cnn.weights, cnn.biases, cnn.dropout)
 
 # Define loss and optimizer
 #cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred, labels=cnn.y))
 #cost = tf.reduce_mean(bpmll_out_module.bp_mll(pred, cnn.y))
-cost = -tf.reduce_sum(((cnn.y * tf.log(pred + 1e-9)) + ((1-cnn.y) * tf.log(1 - pred + 1e-9)))  , name='xentropy' ) + 0.01 * (tf.nn.l2_loss(cnn.weights['wd2']) + tf.nn.l2_loss(cnn.weights['out']))
+cost = -tf.reduce_sum(((cnn.y * tf.log(pred + 1e-9)) + ((1-cnn.y) * tf.log(1 - pred + 1e-9)))  , name='xentropy' ) + 0.01 * (tf.nn.l2_loss(cnn.weights['wd1']) + tf.nn.l2_loss(cnn.weights['out']))
 optimizer = tf.train.AdamOptimizer(learning_rate=cnn.learning_rate).minimize(cost)
 #optimizer = tf.train.AdagradOptimizer(learning_rate=cnn.learning_rate).minimize(cost)
 # Evaluate model
@@ -43,10 +43,10 @@ optimizer = tf.train.AdamOptimizer(learning_rate=cnn.learning_rate).minimize(cos
 #accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #accuracy = get_accuracy(logits=pred, labels=y)
 data = ds.Dataset(path, config.batch_size)
-data.load_data_train()
+#data.load_data_train()
 #data.read_labels() # bibtex, RCV
-#data.all_data() # AgNews
-#data.all_data_vectorizer(1) # AgNews
+data.all_data(2) # AgNews
+#data.all_data_vectorizer(2) # AgNews
 #data.read_text(0, 199328)
 #data.write_cvs()
 
@@ -62,10 +62,10 @@ svd_transformer = Pipeline([('tfidf', vectorizer),
                             ('svd', svd_model)])
 
 #texts_train = list(data.texts)
-svd_transformer.fit_transform(data.texts)
+#svd_transformer.fit_transform(data.texts)
 
-#pickle.dump(svd_transformer, open("data/rcv1-2/train1014/vectorizer/vectorizer_lsi.pickle", "wb"), protocol=4)
-svd_transformer = pickle.load(open("data/rcv1-2/train1014/vectorizer/vectorizer_lsi.pickle", "rb"))
+#pickle.dump(svd_transformer, open("data/yelp/vectorizer/vectorizer_lsi.pickle", "wb"), protocol=4)
+svd_transformer = pickle.load(open("data/yelp/vectorizer/vectorizer_lsi.pickle", "rb"))
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
@@ -83,7 +83,7 @@ with tf.Session() as sess:
     epoch = 1
     model_saving = 1
     print("Epoch: " + str(epoch))
-    #saver.restore(sess, "mlp_weights/model1014_mlp_1_lsi.ckpt")
+    #saver.restore(sess, "cnn_weights_agnews/model_cnn_5_lsi5.ckpt")
     #data.shuffler()
     plot_x = []
     plot_y = []
@@ -91,11 +91,16 @@ with tf.Session() as sess:
     #data.load_data_train()
     data.shuffler()
     print("TOTAL Training: ", data.total_texts)
+    #data.next_batch()
+    #data.generate_batch()
+    #batch_x = svd_transformer.transform(data.texts_train) 
+    #for i in range(len(batch_x)):
+    #    print(batch_x[i])
     train = True
     if train == True:
         while step * config.batch_size <= config.training_iters:
             data.next_batch()
-            data.generate_batch_text()
+            data.generate_batch()
             #print data.texts_train.shape
             #print config.batch_size
             #batch_x = np.array(data.texts_train)
@@ -132,7 +137,7 @@ with tf.Session() as sess:
                 print("Epoch: " + str(epoch))
                 data.shuffler()
             if step % 10000 == 0:
-                save_path = saver.save(sess, "cnn_weights/model_cnn_" + str(model_saving) + "_lsi2.ckpt")
+                save_path = saver.save(sess, "cnn_weights_yelp/model_cnn_mine_" + str(model_saving) + "_lsi.ckpt")
                 model_saving += 1
             step += 1
         print(plot_x)
@@ -140,7 +145,7 @@ with tf.Session() as sess:
         print ("TESTING")
         data = None
         data = ds.Dataset(path, config.batch_size)
-        data.load_data_test()
+        data.all_data_test(2)
         step = 1
         total_test = data.total_texts
         print (total_test)
@@ -153,7 +158,7 @@ with tf.Session() as sess:
         while step * config.batch_size <= total_test:
             data.next_batch()
             #data.read_data()
-            data.generate_batch_test_text()
+            data.generate_batch()
             #print data.texts_train.shape
             #print config.batch_size
             #batch_x = np.array(data.texts_train)

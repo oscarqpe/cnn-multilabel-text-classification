@@ -110,7 +110,18 @@ def read_labels (type):
 			for line in ins:
 				config.labels.append(line.strip("\n"))
 				config.label_size = len(config.labels)
-
+	elif type == "ag_news":
+		config.label_size = 4
+	elif type == "yelp":
+		config.label_size = 5
+	elif type == "dbpedia":
+		config.label_size = 14
+	elif type == "sogou":
+		config.label_size = 5
+	elif type == "yahoo":
+		config.label_size = 10
+	elif type == "amazon":
+		config.label_size = 5
 def get_path_file(i):
 	print ("Extrayendo textos archivo " + str(i))
 	e = ""
@@ -300,10 +311,10 @@ def get_accuracy_test (logits, labels):
 		
 		if len(max_h) == 0:
 			max_h = max_x
-		#max_h = max_x ## for multi class
+		max_h = max_x ## for multi class
 		max_x = np.array(max_x)
 		ranking_y_predicted = rankdata(max_x_val)
-		#print("(X, Y): ", max_h, max_y, max_x, max_x_val)
+		print("(X, Y): ", max_h, max_y, max_x, max_x_val)
 		### HAMMING LOSS ###
 		hammin_loss_sum += len(np.setdiff1d(max_x, max_y)) + len(np.setdiff1d(max_y, max_x))
 		### ONE ERROR ###
